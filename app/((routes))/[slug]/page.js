@@ -8,19 +8,7 @@ import { useEffect, useState } from "react";
 
 const page = () => {
 
-  const [uploads, setUploads] = useState([
-    {
-      id: "1",
-      type: "image", // file
-      url : "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg",
-      name: "image.jpg",
-    },
-    {
-      id: "2",
-      type: "file", // file
-      name: "file.pdf",
-    },
-  ]);
+  const [uploads, setUploads] = useState([]);
 
   // Extras for the page
   const { slug } = useParams();
@@ -42,7 +30,7 @@ const page = () => {
     // open file upload dialog
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = '*';
+    fileInput.accept = '*'; // accept all file types
     fileInput.multiple = true;
     fileInput.click();
     fileInput.addEventListener('change', (e) => {
@@ -51,6 +39,11 @@ const page = () => {
         const newUploads = [...uploads];
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
+          // check file type and size
+          if (file.type.startsWith('video/') || file.size > 10485760) {
+            alert('Video files and files larger than 10MB are not allowed');
+            continue;
+          }
           const newUpload = {
             id: new Date().getTime().toString(),
             type: file.type.split('/')[0],
