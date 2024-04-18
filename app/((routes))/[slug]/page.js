@@ -2,7 +2,6 @@
 import ChatBox from "@/app/components/ChatBox";
 import UploadViewer from "@/app/components/UploadViewer";
 import { Spinner } from "@nextui-org/spinner";
-import { marked } from "marked";
 import NextImage from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -60,9 +59,9 @@ const page = () => {
     });
   };
 
-  const insertClickHandler = async (e) => {
+  const insertClickHandler = (e) => {
     const textArea = document.querySelector('.text-area-input');
-    const message = marked(textArea.value.trim()); // Parse the markdown
+    const message = textArea.value.trim();
     console.log(message);
     if (message.length === 0 && uploads.length === 0) {
       alert('Please enter a message or upload a file');
@@ -73,9 +72,8 @@ const page = () => {
       message: message,
       uploads: uploads,
     };
-    const newChatData = [...chatData, chat];
-    await setChatData(newChatData);
-    console.log(newChatData);
+    setChatData((prevChatData) => [...prevChatData, chat]);
+    console.log(chat);
     textArea.value = '';
     setUploads([]);
   };
