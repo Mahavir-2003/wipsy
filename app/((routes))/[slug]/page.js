@@ -2,6 +2,7 @@
 import ChatBox from "@/app/components/ChatBox";
 import UploadViewer from "@/app/components/UploadViewer";
 import { Spinner } from "@nextui-org/spinner";
+import { marked } from "marked";
 import NextImage from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { useEffect, useState } from "react";
 const page = () => {
 
   const [uploads, setUploads] = useState([]);
-
+  const [chatData, setChatData] = useState([]);
   // Extras for the page
   const { slug } = useParams();
   const [ID, setID] = useState(slug);
@@ -59,8 +60,24 @@ const page = () => {
     });
   };
 
-  const insertClickHandler = () => {
-    console.log("insertClickHandler");
+  const insertClickHandler = async (e) => {
+    const textArea = document.querySelector('.text-area-input');
+    const message = marked(textArea.value.trim()); // Parse the markdown
+    console.log(message);
+    if (message.length === 0 && uploads.length === 0) {
+      alert('Please enter a message or upload a file');
+      return;
+    }
+    const chat = {
+      id: new Date().getTime().toString(),
+      message: message,
+      uploads: uploads,
+    };
+    const newChatData = [...chatData, chat];
+    await setChatData(newChatData);
+    console.log(newChatData);
+    textArea.value = '';
+    setUploads([]);
   };
 
   const imagePasteHandler = (e) => {
@@ -95,17 +112,12 @@ const page = () => {
     }
   };
 
-  const textAreaDragAndDropHandler = () => {
-    console.log("textAreaDragAndDropHandler");
-  };
-
-
-
+  
   return (
     <div className="w-full h-full flex justify-center items-end">
       <div className=" h-full w-[70%]  flex flex-col justify-start items-center">
         <div className=" w-full overflow-hidden py-3 flex-1 h-full">
-          <ChatBox />
+          <ChatBox chatData={chatData}/>
         </div>
         <div className="Input-Area w-full flex justify-center items-center mb-5 max-h-fit relative">
           <div className={`absolute top-0 translate-y-[-100%] left-0 w-[40%] aspect-video pb-3 ${uploads.length == 0 ? "hidden" : "block"}`}>
@@ -130,12 +142,13 @@ const page = () => {
             }
           </button>
           <textarea
-          onDrop={textAreaDragAndDropHandler}
           onPaste={imagePasteHandler}
             className="text-area-input w-[90%] h-[70px] placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent  resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
             placeholder="Type your message here"
           ></textarea>
-          <button className="insert-button aspect-video flex justify-center items-center h-full hover:bg-yellow-300 bg-yellow-400 text-black text-lg font-medium tracking-wide rounded-md ml-2">
+          <button 
+          onClick={insertClickHandler}
+          className="insert-button aspect-video flex justify-center items-center h-full hover:bg-yellow-300 bg-yellow-400 text-black text-lg font-medium tracking-wide rounded-md ml-2">
             {
               <div className="relative h-[50%] aspect-square flex justify-center items-center">
                 {false ? (
