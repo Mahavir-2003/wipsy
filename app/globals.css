@@ -28,3 +28,13 @@ textarea::-webkit-scrollbar-thumb {
   background-color: #fafafa88;
   border-radius: 4px;
 }
+
+.scrollbar::-webkit-scrollbar {
+  width: 6px;
+  background-color: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #fafafa88;
+  border-radius: 4px;
+}
