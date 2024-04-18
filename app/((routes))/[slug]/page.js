@@ -64,13 +64,13 @@ const page = () => {
   };
 
   const imagePasteHandler = (e) => {
-    console.log("imagePasteHandler");
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
     // iterate until we find an image
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf('image') !== -1) {
         const blob = items[i].getAsFile();
         const reader = new FileReader();
+        const itemType = items[i].type; // Store the type in a variable
         reader.onloadend = function() {
           const base64data = reader.result;
           // Check if image already exists in uploads
@@ -78,10 +78,12 @@ const page = () => {
             alert('This image has already been uploaded');
             return;
           }
+          // Extract the extension from the MIME type
+          const extension = itemType.split('/')[1]; // Use the stored type
           const newUpload = {
             id: new Date().getTime().toString(),
             type: 'image',
-            name: `image_${new Date().getTime()}.png`, // Unique name based on current timestamp
+            name: `image_${new Date().getTime()}.${extension}`, // Dynamic extension
             file: base64data,
             url: URL.createObjectURL(blob),
           };
