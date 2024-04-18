@@ -2,32 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+*{
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+/* This will change the scrollbar track (background) */
+textarea::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+textarea::-webkit-scrollbar-thumb {
+  background-color: #fafafa88;
+  border-radius: 4px;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+
+.chat-history::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+  background-color: #fafafa88;
+  border-radius: 4px;
 }
