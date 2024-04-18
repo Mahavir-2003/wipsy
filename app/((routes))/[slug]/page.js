@@ -1,4 +1,5 @@
 "use client";
+import { Spinner } from "@nextui-org/spinner";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -24,22 +25,39 @@ const page = () => {
           chatbox
         </div>
         <div className="Input-Area w-full flex justify-center items-center mb-10 max-h-fit">
+          <button className="group bg-transparent border-[1px] duration-200 hover:border-[#fafafa] border-[#fafafa]/15 rounded-md h-full aspect-square mr-2 flex justify-center items-center">
+            {
+              <div className="relative w-[50%] aspect-square flex justify-center items-center ">
+                {false ? (
+                  <Spinner size="md" color="current" />
+                ) : (
+                  <Image
+                    src="/Upload.svg"
+                    fill={true}
+                    alt="send"
+                    className="object-cover w-full h-full duration-200 opacity-50 group-hover:opacity-100"
+                  />
+                )}
+              </div>
+            }
+          </button>
           <textarea
-            className="w-[90%] h-[70px] bg-transparent  resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/60 border-[#fafafa]/10"
+            className="w-[90%] h-[70px] placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent  resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
             placeholder="Type your message here"
           ></textarea>
-          <button className="min-w-[10%] flex justify-center items-center h-full hover:bg-yellow-400 bg-yellow-300 text-black text-lg font-medium tracking-wide rounded-md ml-2">
+          <button className=" aspect-video flex justify-center items-center h-full hover:bg-yellow-300 bg-yellow-400 text-black text-lg font-medium tracking-wide rounded-md ml-2">
             {
-              <div className="relative w-[25%] aspect-square">
-                {
-                  true ?
-                <Image
-                  src="/send.svg"
-                  fill={true}
-                  alt="send"
-                  className="object-cover w-full h-full"
-                /> : null
-                }
+              <div className="relative h-[50%] aspect-square flex justify-center items-center">
+                {false ? (
+                  <Spinner size="md" color="current" />
+                ) : (
+                  <Image
+                    src="/send.svg"
+                    fill={true}
+                    alt="send"
+                    className="object-cover w-full h-full"
+                  />
+                )}
               </div>
             }
           </button>
