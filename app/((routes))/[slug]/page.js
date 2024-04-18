@@ -24,7 +24,6 @@ const page = () => {
     }
   }, []);
 
-
   // Logical part of the page
   const fileUploadClickHandler = () => {
     // open file upload dialog
@@ -64,6 +63,36 @@ const page = () => {
     console.log("insertClickHandler");
   };
 
+  const imagePasteHandler = (e) => {
+    console.log("imagePasteHandler");
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    // iterate until we find an image
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const blob = items[i].getAsFile();
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          const base64data = reader.result;
+          // Check if image already exists in uploads
+          if (uploads.some(upload => upload.file === base64data)) {
+            alert('This image has already been uploaded');
+            return;
+          }
+          const newUpload = {
+            id: new Date().getTime().toString(),
+            type: 'image',
+            name: `image_${new Date().getTime()}.png`, // Unique name based on current timestamp
+            file: base64data,
+            url: URL.createObjectURL(blob),
+          };
+          setUploads((prevUploads) => [...prevUploads, newUpload]);
+        }
+        reader.readAsDataURL(blob);
+        break;
+      }
+    }
+  };
+
   const textAreaDragAndDropHandler = () => {
     console.log("textAreaDragAndDropHandler");
   };
@@ -99,6 +128,8 @@ const page = () => {
             }
           </button>
           <textarea
+          onDrop={textAreaDragAndDropHandler}
+          onPaste={imagePasteHandler}
             className="text-area-input w-[90%] h-[70px] placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent  resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
             placeholder="Type your message here"
           ></textarea>
