@@ -1,4 +1,6 @@
 import React from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const ChatBox = ({chatData}) => {
   return (
@@ -6,7 +8,7 @@ const ChatBox = ({chatData}) => {
       {chatData.map((chat, index) => (
         <div key={index} className='flex justify-start items-center w-full mb-2'>
           <div className='flex flex-col justify-center items-start ml-2'>
-            <p className='text-[#fafafa] text-lg font-light'>{chat.message}</p>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{chat.message}</ReactMarkdown>
           </div>
         </div>
       ))}
