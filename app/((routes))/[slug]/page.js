@@ -5,6 +5,7 @@ import { Spinner } from "@nextui-org/spinner";
 import NextImage from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { base } from "@uploadcare/upload-client";
 
 const page = () => {
   
@@ -13,6 +14,7 @@ const page = () => {
   const [textAreaValue, setTextAreaValue] = useState("");
   const { slug } = useParams();
   const [ID, setID] = useState(slug);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const newSlug = decodeURIComponent(slug)
@@ -58,48 +60,47 @@ const page = () => {
     });
   };
 
-  const insertClickHandler = (e) => {
+  const insertClickHandler = async (e) => {
+    setIsUploading(true);
     const message = textAreaValue.trim();
     if (message.length === 0 && uploads.length === 0) {
-      alert("Please enter a message or upload a file");
+      alert("Please enter a message or upload an image");
       return;
     }
 
-    const chatUploads = uploads.map(upload => {
-      if (upload.type === 'image') {
-        if (typeof upload.file === 'string' && upload.file.startsWith('data:')) {
-          // If the upload is a base64 image string, create a Blob URL
-          const blob = dataURItoBlob(upload.file);
+    const chatUploads = await Promise.all(
+      uploads.map(async (upload) => {
+        if (upload.type === "image") {
+          console.log("Uploading image:", upload.name); // Log uploading status
+          const result = await base(upload.file, {
+            publicKey: "8c1816e1b2b84ba30ae9",
+            store: "auto",
+            metadata: {
+              subsystem: "uploader",
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set TTL to 24 hours
+            },
+          });
+          const fileId = Object.values(result)[0];
           return {
             ...upload,
-            file: blob,
-            url: URL.createObjectURL(blob)
+            url: `https://ucarecdn.com/${fileId}/${upload.name}`, // Use Uploadcare URL
           };
         } else {
-          // If the upload is a file, create a Blob URL
-          return {
-            ...upload,
-            url: URL.createObjectURL(upload.file)
-          };
+          return upload;
         }
-      } else {
-        // If the upload is not an image, create a Blob URL
-        return {
-          ...upload,
-          url: URL.createObjectURL(upload.file)
-        };
-      }
-    });
+      })
+    );
 
     const chat = {
       id: new Date().getTime().toString(),
       message: message,
-      uploads: chatUploads
+      uploads: chatUploads,
     };
 
     setChatData((prevChatData) => [...prevChatData, chat]);
     setTextAreaValue("");
     setUploads([]);
+    setIsUploading(false);
   };
 
   const textPasteHandler = (e) => {
@@ -183,7 +184,7 @@ const page = () => {
           >
             {
               <div className="relative w-[50%] aspect-square flex justify-center items-center ">
-                {false ? (
+                {isUploading ? (
                   <Spinner size="md" color="current" />
                 ) : (
                   <NextImage

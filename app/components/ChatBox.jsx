@@ -45,17 +45,25 @@ const components = {
   }
 };
 
-const downloadFile = (url, name) => {
+const downloadFile = async (url, name) => {
+  // Fetch the image data
+  const response = await fetch(url);
+  const data = await response.blob();
+
+  // Create an object URL for the image data
+  const objectUrl = window.URL.createObjectURL(data);
+
+  // Create a link and simulate a click to download the image
   const link = document.createElement('a');
-  // set display none
-  link.style.display = 'none';
-  link.href = url;
+  link.href = objectUrl;
   link.download = name;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
-};
 
+  // Clean up
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(objectUrl);
+};
 const ChatBox = ({ chatData }) => {
   return (
     <div className="bg-transparent min-h-full flex flex-col gap-y-10 justify-start items-center chat-history w-full px-3 py-2 overflow-x-hidden overflow-y-auto h-[200px]">
