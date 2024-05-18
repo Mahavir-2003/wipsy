@@ -20,7 +20,7 @@ textarea::-webkit-scrollbar-thumb {
 
 
 .chat-history::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
   background-color: transparent;
 }
 
@@ -30,13 +30,28 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
   background-color: transparent;
 }
 
 .scrollbar::-webkit-scrollbar-thumb {
   background-color: #fafafa88;
   border-radius: 4px;
+}
+
+.code-block::-webkit-scrollbar {
+  height: 5px;
+  background-color: transparent;
+}
+
+.code-block::-webkit-scrollbar-thumb {
+  background-color: #fafafa88;
+  border-radius: 4px;
+}
+
+.code-block::-webkit-scrollbar-thumb:hover {
+  background-color: #d1d1d1;
+  cursor: pointer;
 }
 
 h1 {
