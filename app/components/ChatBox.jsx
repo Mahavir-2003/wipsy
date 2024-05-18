@@ -5,6 +5,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { nightOwl } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { GoCopy } from "react-icons/go";
+import { GoDownload } from "react-icons/go";
+import { FcDocument } from "react-icons/fc";
 
 const customStyle = {
   width : '100%',
@@ -44,26 +46,53 @@ const components = {
   }
 };
 
+const downloadFile = (url, name) => {
+  const link = document.createElement('a');
+  // set display none
+  link.style.display = 'none';
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const ChatBox = ({ chatData }) => {
+  
   return (
-    <div className="bg-transparent min-h-full flex flex-col justify-start items-center chat-history w-full border-[0px] border-[#fafafa]/15 rounded-md px-3 py-2 overflow-x-hidden overflow-y-auto h-[200px]">
+    <div className="bg-transparent min-h-full flex flex-col gap-y-10 justify-start items-center chat-history w-full px-3 py-2 overflow-x-hidden overflow-y-auto h-[200px]">
       {chatData.map((chat, index) => (
-        <div key={index} className="flex flex-col justify-start items-start w-full mb-2 ">
-          <div className="flex flex-col justify-center items-start ml-2 w-full">
+        <div key={index} className="flex flex-col justify-start items-start w-full">
+          <div className="flex flex-col justify-center items-start  w-full">
             <ReactMarkdown className=' w-full' remarkPlugins={[remarkGfm]} components={components}>
               {chat.message}
             </ReactMarkdown>
           </div>
           {chat.uploads.length > 0 && (
-            <div className="flex flex-wrap justify-start items-center mt-2">
+            <div className="flex flex-wrap flex-col justify-start items-start mt-2">
               {chat.uploads.map((upload, index) => (
                 <div key={index} className="mr-2 mb-2">
                   {upload.type === 'image' ? (
-                    <img src={upload.url} alt={upload.name} className="max-w-[200px] max-h-[200px]" />
+                    <div className='relative min-w-fit min-h-fit group '>
+                      <div key={index} onClick={
+                        () => downloadFile(upload.url, upload.name)
+                      } className='absolute m-1 p-2 bg-[#151515] rounded-md right-0 bottom-0 opacity-0 group-hover:opacity-100 hover:cursor-pointer'>
+                        <GoDownload size={22} />
+                      </div>
+                      <img src={upload.url} alt={upload.name} className="max-h-[200px] aspect-auto rounded-md" />
+                    </div>
                   ) : (
-                    <a href={upload.url} download={upload.name}>
-                      {upload.name}
-                    </a>
+                    <div key={upload.url} className='bg-[#151515bf] border border-[#fafafa]/15 flex justify-start items-center gap-x-3 py-2 pr-3 rounded-md'>
+                      <FcDocument size={70} />
+                      <p className='mr-14' >{upload.name}</p>
+                      <button onClick={
+                        () => downloadFile(upload.url, upload.name)
+                      }
+                      className=' bg-[#fafafa] p-2 rounded-md'
+                      >
+                        <GoDownload size={22} color='black' />
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}
