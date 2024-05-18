@@ -27,7 +27,7 @@ const page = () => {
   const fileUploadClickHandler = () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "*";
+    fileInput.accept = "image/*"; // Accept only image files
     fileInput.multiple = true;
     fileInput.click();
     fileInput.addEventListener("change", (e) => {
@@ -36,20 +36,22 @@ const page = () => {
         const newUploads = [...uploads];
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          if (file.type.startsWith("video/") || file.size > 10485760) {
-            alert("Video files and files larger than 10MB are not allowed");
-            continue;
-          }
-          const newUpload = {
-            id: new Date().getTime().toString(),
-            type: file.type.split("/")[0],
-            name: file.name,
-            file: file,
-          };
-          if (newUpload.type === "image") {
+          if (file.type.startsWith("image/")) { // Check if the file is an image
+            if (file.size > 10485760) { // Check if the file size is greater than 10MB
+              alert("Image files larger than 10MB are not allowed");
+              continue;
+            }
+            const newUpload = {
+              id: new Date().getTime().toString(),
+              type: file.type.split("/")[0],
+              name: file.name,
+              file: file,
+            };
             newUpload.url = URL.createObjectURL(file);
+            newUploads.push(newUpload);
+          } else {
+            alert("Only image files are allowed"); // Show an alert if the user tries to upload a non-image file
           }
-          newUploads.push(newUpload);
         }
         setUploads(newUploads);
       }
