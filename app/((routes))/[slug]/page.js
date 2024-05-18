@@ -67,12 +67,20 @@ const page = () => {
       alert("Please enter a message or upload an image");
       return;
     }
-
+  
     const chatUploads = await Promise.all(
       uploads.map(async (upload) => {
         if (upload.type === "image") {
           console.log("Uploading image:", upload.name); // Log uploading status
-          const result = await base(upload.file, {
+          let file;
+          if (typeof upload.file === 'string' && upload.file.startsWith('data:')) {
+            // If the upload is a base64 image string, convert it to a Blob
+            file = dataURItoBlob(upload.file);
+          } else {
+            // If the upload is a File object, use it as is
+            file = upload.file;
+          }
+          const result = await base(file, {
             publicKey: "8c1816e1b2b84ba30ae9",
             store: "auto",
             metadata: {
@@ -82,7 +90,10 @@ const page = () => {
           });
           const fileId = Object.values(result)[0];
           return {
-            ...upload,
+            id: fileId, // Use the UUID returned from Uploadcare
+            type: upload.type,
+            name: upload.name,
+            file: file,
             url: `https://ucarecdn.com/${fileId}/${upload.name}`, // Use Uploadcare URL
           };
         } else {
@@ -90,13 +101,13 @@ const page = () => {
         }
       })
     );
-
+  
     const chat = {
       id: new Date().getTime().toString(),
       message: message,
       uploads: chatUploads,
     };
-
+  
     setChatData((prevChatData) => [...prevChatData, chat]);
     setTextAreaValue("");
     setUploads([]);
@@ -210,7 +221,7 @@ const page = () => {
           >
             {
               <div className="relative h-[50%] aspect-square flex justify-center items-center">
-                {false ? (
+                {isUploading ? (
                   <Spinner size="md" color="current" />
                 ) : (
                   <NextImage

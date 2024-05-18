@@ -77,13 +77,13 @@ const ChatBox = ({ chatData }) => {
           {chat.uploads.length > 0 && (
             <div className="flex flex-wrap flex-row justify-start items-start mt-2 ">
               {chat.uploads.map((upload, index) => (
-                <div key={index} className="mr-2 mb-2 ">
+                <div key={upload.id} className="mr-2 mb-2 ">
                   {upload.type === 'image' ? (
                     <div className='relative min-w-fit min-h-fit group '>
-                      <div key={index} onClick={() => downloadFile(upload.url, upload.name)} className='absolute m-1 p-2 bg-[#151515] rounded-md right-0 bottom-0 opacity-0 group-hover:opacity-100 hover:cursor-pointer'>
+                      <div key={upload.id} onClick={() => downloadFile(upload.url, upload.name)} className='absolute m-1 p-2 bg-[#151515] rounded-md right-0 bottom-0 opacity-0 group-hover:opacity-100 hover:cursor-pointer'>
                         <GoDownload size={22} />
                       </div>
-                      <img src={upload.url} alt={upload.name} className="max-h-[200px] aspect-auto rounded-md" />
+                      <img src={upload.url} alt={upload.name} className="h-[200px] aspect-auto rounded-md" />
                     </div>
                   ) : null}
                 </div>
