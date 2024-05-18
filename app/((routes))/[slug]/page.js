@@ -81,9 +81,12 @@ const page = () => {
             file = upload.file;
           }
           const result = await base(file, {
+//             # Expire in 30 min, e.g., 1454903856
+// expire = int(time.time()) + 60 * 30
+// set expiry in 30 seconds
             publicKey: "8c1816e1b2b84ba30ae9",
-            store: "auto",
-            metadata: {
+            store: false,
+            metadata: {              
               subsystem: "uploader",
               expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set TTL to 24 hours
             },
