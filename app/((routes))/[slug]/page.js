@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const page = () => {
+  
   const [uploads, setUploads] = useState([]);
   const [chatData, setChatData] = useState([]);
   const [textAreaValue, setTextAreaValue] = useState("");
@@ -61,11 +62,39 @@ const page = () => {
       alert("Please enter a message or upload a file");
       return;
     }
+
+    const chatUploads = uploads.map(upload => {
+      if (upload.type === 'image') {
+        if (typeof upload.file === 'string' && upload.file.startsWith('data:')) {
+          // If the upload is a base64 image string, create a Blob URL
+          const blob = dataURItoBlob(upload.file);
+          return {
+            ...upload,
+            file: blob,
+            url: URL.createObjectURL(blob)
+          };
+        } else {
+          // If the upload is a file, create a Blob URL
+          return {
+            ...upload,
+            url: URL.createObjectURL(upload.file)
+          };
+        }
+      } else {
+        // If the upload is not an image, create a Blob URL
+        return {
+          ...upload,
+          url: URL.createObjectURL(upload.file)
+        };
+      }
+    });
+
     const chat = {
       id: new Date().getTime().toString(),
       message: message,
-      uploads: uploads,
+      uploads: chatUploads
     };
+
     setChatData((prevChatData) => [...prevChatData, chat]);
     setTextAreaValue("");
     setUploads([]);
@@ -73,7 +102,7 @@ const page = () => {
 
   const textPasteHandler = (e) => {
     const pastedText = (e.clipboardData || window.clipboardData).getData("text/plain");
-    setTextAreaValue(pastedText);
+    setTextAreaValue(prevValue => prevValue + pastedText);
   };
 
   const imagePasteHandler = (e) => {
@@ -112,6 +141,20 @@ const page = () => {
     textPasteHandler(e);
     imagePasteHandler(e);
   };
+
+  // Helper function to convert a base64 string to a Blob
+  function dataURItoBlob(dataURI) {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
+  }
 
   return (
     <div className="w-full h-full flex justify-center items-end">
