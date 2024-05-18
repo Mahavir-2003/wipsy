@@ -6,6 +6,7 @@ import NextImage from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { base } from "@uploadcare/upload-client";
+import axios from "axios";
 
 const page = () => {
   
@@ -16,6 +17,27 @@ const page = () => {
   const [ID, setID] = useState(slug);
   const [isUploading, setIsUploading] = useState(false);
 
+
+  const fetchChatHistory = async () => {
+    const response = await axios.post("/api/fetch", { chatID: ID });
+    if (response.status === 200) {
+      setChatData(response.data.chatHistory);
+    }else{
+      console.log("Error fetching chat history : ", response.data.error);
+      alert("Error fetching chat history");
+    }
+  };
+
+  const updateChatHistory = async (Chat) => {
+    const response = await axios.post("/api/update", { chatID: ID, chatHistory: Chat });
+    if (response.status === 200) {
+      await setChatData(response.data.chatHistory);
+    }else{
+      console.log("Error updating chat history : ", response.data.error);
+      alert("Error updating chat history");
+    }
+  };
+
   useEffect(() => {
     const newSlug = decodeURIComponent(slug)
       .replace(/\s+/g, "-")
@@ -24,6 +46,8 @@ const page = () => {
       window.location.replace("/" + newSlug);
       setID(newSlug);
     }
+
+    fetchChatHistory();
   }, []);
 
   const fileUploadClickHandler = () => {
@@ -59,6 +83,10 @@ const page = () => {
       }
     });
   };
+
+
+
+
 
   const insertClickHandler = async (e) => {
     setIsUploading(true);
@@ -110,8 +138,9 @@ const page = () => {
       message: message,
       uploads: chatUploads,
     };
-  
-    setChatData((prevChatData) => [...prevChatData, chat]);
+    const newData = [...chatData , chat];
+    await updateChatHistory(newData);
+    // await setChatData((prevChatData) => [...prevChatData, chat]);
     setTextAreaValue("");
     setUploads([]);
     setIsUploading(false);

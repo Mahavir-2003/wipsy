@@ -74,7 +74,7 @@ const ChatBox = ({ chatData }) => {
               {chat.message}
             </ReactMarkdown>
           </div>
-          {chat.uploads.length > 0 && (
+          {chat.uploads?.length > 0 && (
             <div className="flex flex-wrap flex-row justify-start items-start mt-2 ">
               {chat.uploads.map((upload, index) => (
                 <div key={upload.id} className="mr-2 mb-2 ">
