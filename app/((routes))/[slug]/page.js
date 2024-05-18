@@ -124,7 +124,6 @@ const page = () => {
             id: fileId, // Use the UUID returned from Uploadcare
             type: upload.type,
             name: upload.name,
-            file: file,
             url: `https://ucarecdn.com/${fileId}/${upload.name}`, // Use Uploadcare URL
           };
         } else {

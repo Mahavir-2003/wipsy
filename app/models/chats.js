@@ -9,7 +9,13 @@ const chatSchema = new Schema({
         type: Array,
         default: [],
     },
+    expiryDate: {
+        type: Date,
+        default: Date.now + 86400,
+    }
 });
+
+chatSchema.index({chatID: 1},{expireAfterSeconds: 86400});
 
 const Chat = mongoose.models.Chat || mongoose.model('Chat', chatSchema);
 
