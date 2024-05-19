@@ -24,6 +24,7 @@ const page = () => {
     const response = await axios.post("/api/fetch", { chatID: ID });
     if (response.status == 200) {
       setChatData(response.data.chatHistory);
+      toast(`Your chat will expire in ${response.data.expiryTime}`, { icon: "🕒" })
     } else {
       console.error("Server error when fetching chat history:", response.data.error);
       toast.error("Server error when fetching chat history");

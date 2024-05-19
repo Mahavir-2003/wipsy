@@ -17,7 +17,18 @@ export async function POST(req, res) {
         if(!chat){
             chat = await Chat.create({ chatID });
         }
-        return NextResponse.json({chatHistory :  chat.chatHistory }, {status: 200});
+
+        // count remaining time for chat expiry (the chat will expire after 24 hours of creation)
+        const currentTime = new Date();
+        const expiryTime = new Date(chat.createdAt);
+        expiryTime.setHours(expiryTime.getHours() + 24);
+        var remainingTime = expiryTime - currentTime;
+        // convert to hours:minute format
+        const hours = Math.floor(remainingTime / 3600000);
+        const minutes = Math.floor((remainingTime % 3600000) / 60000);
+        remainingTime = `${hours} hours ${minutes} minutes`;
+        
+        return NextResponse.json({chatHistory :  chat.chatHistory , expiryTime : remainingTime }, {status: 200});
     }catch(err){
         console.log(err);
         return NextResponse.json({ error: "Error fetching chat" }, {status: 500});
