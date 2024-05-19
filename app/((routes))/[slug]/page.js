@@ -57,16 +57,17 @@ const page = () => {
 );
 
   useEffect(() => {
-    const newSlug = decodeURIComponent(slug)
-      .replace(/\s+/g, "-")
-      .replace(/[^a-zA-Z0-9\-]/g, "");
-    if (newSlug !== slug) {
-      window.location.replace("/" + newSlug);
-      setID(newSlug);
-    }
-
+  const newSlug = decodeURIComponent(slug)
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9\-]/g, "");
+  
+  if (newSlug !== slug) {
+    window.location.replace("/" + newSlug);
+    setID(newSlug);
+  } else {
     fetchChatHistory();
-  }, [fetchChatHistory, slug]);
+  }
+}, [fetchChatHistory, slug]);
 
   const fileUploadClickHandler = useCallback(() => {
   try {
