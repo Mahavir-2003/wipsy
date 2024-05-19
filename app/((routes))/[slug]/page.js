@@ -143,7 +143,7 @@ const page = () => {
 
             console.log("Uploading image:", upload.name);
             const result = await base(compressedFile, {
-              publicKey: "8c1816e1b2b84ba30ae9",
+              publicKey: process.env.NEXT_PUBLIC_UPLOADCARE_KEY,
               store: false,
               metadata: {
                 subsystem: "uploader",
