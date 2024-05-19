@@ -6,6 +6,7 @@ import { nightOwl } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { GoCopy } from "react-icons/go";
 import { GoDownload } from "react-icons/go";
+import toast from 'react-hot-toast';
 
 const customStyle = {
   width : '100%',
@@ -25,8 +26,11 @@ const components = {
         <div className='w-full flex justify-between items-center py-2 px-4 border-b border-[#fafafa]/15'>
           <p>{match[1]}</p>
          <CopyToClipboard onCopy={
-          () => alert('Code Copied')
-         } text={String(children).replace(/\n$/, '')}>
+          () => {
+            toast.success('Copied to Clipboard');
+          }
+         }
+          text={String(children).replace(/\n$/, '')}>
           <button>
           <GoCopy />
           </button>
@@ -46,23 +50,33 @@ const components = {
 };
 
 const downloadFile = async (url, name) => {
-  // Fetch the image data
-  const response = await fetch(url);
-  const data = await response.blob();
+  try {
+    // Fetch the image data
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.blob();
 
-  // Create an object URL for the image data
-  const objectUrl = window.URL.createObjectURL(data);
+    // Create an object URL for the image data
+    const objectUrl = window.URL.createObjectURL(data);
 
-  // Create a link and simulate a click to download the image
-  const link = document.createElement('a');
-  link.href = objectUrl;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
+    // Create a link and simulate a click to download the image
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
 
-  // Clean up
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(objectUrl);
+    // Clean up
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(objectUrl);
+
+    toast.success('File Downloaded');
+  } catch (error) {
+    console.error('An error occurred while downloading the file:', error);
+    toast.error('An error occurred while downloading the file.');
+  }
 };
 const ChatBox = ({ chatData }) => {
   return (
