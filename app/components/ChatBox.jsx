@@ -25,7 +25,7 @@ const components = {
       <div className="relative w-full bg-[#1515156e] rounded-md border border-[#fafafa]/15 overflow-hidden">
         <div className='w-full flex justify-between items-center py-2 px-4 border-b border-[#fafafa]/15'>
           <p>{match[1]}</p>
-         <CopyToClipboard onCopy={
+         <CopyToClipboard className="hover:bg-[#fafafa]/15 p-2 rounded-md" onCopy={
           () => {
             toast.success('Copied to Clipboard');
           }
