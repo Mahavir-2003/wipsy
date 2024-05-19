@@ -4,12 +4,14 @@ import UploadViewer from "@/app/components/UploadViewer";
 import { Spinner } from "@nextui-org/spinner";
 import NextImage from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { base } from "@uploadcare/upload-client";
 import axios from "axios";
+import imageCompression from "browser-image-compression";
+import debounce from "lodash/debounce";
+import toast, { Toaster } from "react-hot-toast";
 
 const page = () => {
-  
   const [uploads, setUploads] = useState([]);
   const [chatData, setChatData] = useState([]);
   const [textAreaValue, setTextAreaValue] = useState("");
@@ -17,26 +19,42 @@ const page = () => {
   const [ID, setID] = useState(slug);
   const [isUploading, setIsUploading] = useState(false);
 
-
-  const fetchChatHistory = async () => {
+ const fetchChatHistory = useCallback(async () => {
+  try {
     const response = await axios.post("/api/fetch", { chatID: ID });
-    if (response.status === 200) {
+    if (response.status == 200) {
       setChatData(response.data.chatHistory);
-    }else{
-      console.log("Error fetching chat history : ", response.data.error);
-      alert("Error fetching chat history");
+    } else {
+      console.error("Server error when fetching chat history:", response.data.error);
+      toast.error("Server error when fetching chat history");
     }
-  };
+  } catch (error) {
+    console.error("Network error when fetching chat history:", error);
+    toast.error("Network error when fetching chat history");
+  }
+}, [ID, setChatData]);
 
-  const updateChatHistory = async (Chat) => {
-    const response = await axios.post("/api/update", { chatID: ID, chatHistory: Chat });
-    if (response.status === 200) {
-      await setChatData(response.data.chatHistory);
-    }else{
-      console.log("Error updating chat history : ", response.data.error);
-      alert("Error updating chat history");
+  const updateChatHistory = useCallback(
+  debounce(async (chatHistory) => {
+    try {
+      const response = await axios.post("/api/update", {
+        chatID: ID,
+        chatHistory,
+      });
+      if (response.status == 200) {
+        setChatData(response.data.chatHistory);
+        toast.success("Chat saved successfully");
+      } else {
+        console.error("Server error when updating chat history:", response.data.error);
+        toast.error("Server error when updating chat history");
+      }
+    } catch (error) {
+      console.error("Network error when updating chat history:", error);
+      toast.error("Network error when updating chat history");
     }
-  };
+  }, 300),
+  [ID, setChatData]
+);
 
   useEffect(() => {
     const newSlug = decodeURIComponent(slug)
@@ -48,149 +66,199 @@ const page = () => {
     }
 
     fetchChatHistory();
-  }, []);
+  }, [fetchChatHistory, slug]);
 
-  const fileUploadClickHandler = () => {
+  const fileUploadClickHandler = useCallback(() => {
+  try {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/*"; // Accept only image files
+    fileInput.accept = "image/*";
     fileInput.multiple = true;
     fileInput.click();
-    fileInput.addEventListener("change", (e) => {
-      const files = e.target.files;
-      if (files.length > 0) {
-        const newUploads = [...uploads];
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          if (file.type.startsWith("image/")) { // Check if the file is an image
-            if (file.size > 10485760) { // Check if the file size is greater than 10MB
-              alert("Image files larger than 10MB are not allowed");
-              continue;
+    fileInput.addEventListener("change", async (e) => {
+      try {
+        const files = e.target.files;
+        if (files.length > 0) {
+          const newUploads = Array.from(files).map((file) => {
+            try {
+              if (file.type.startsWith("image/")) {
+                if (file.size > 10485760) {
+                  toast.error("Image files larger than 10MB are not allowed");
+                  return null;
+                }
+                const newUpload = {
+                  id: new Date().getTime().toString(),
+                  type: file.type.split("/")[0],
+                  name: file.name,
+                  file: file,
+                };
+                newUpload.url = URL.createObjectURL(file);
+                return newUpload;
+              } else {
+                toast.error("Only image files are allowed");
+                return null;
+              }
+            } catch (error) {
+              console.error("Error processing file:", error);
+              toast.error("Error processing file");
+              return null;
             }
-            const newUpload = {
-              id: new Date().getTime().toString(),
-              type: file.type.split("/")[0],
-              name: file.name,
-              file: file,
-            };
-            newUpload.url = URL.createObjectURL(file);
-            newUploads.push(newUpload);
-          } else {
-            alert("Only image files are allowed"); // Show an alert if the user tries to upload a non-image file
-          }
+          });
+          setUploads((prevUploads) => [...prevUploads, ...newUploads.filter(Boolean)]);
         }
-        setUploads(newUploads);
+      } catch (error) {
+        console.error("Error in file input change event:", error);
+        toast.error("Error in file input change event");
       }
     });
-  };
+  } catch (error) {
+    console.error("Error in file upload click handler:", error);
+    toast.error("Error in file upload click handler");
+  }
+}, []);
 
-
-
-
-
-  const insertClickHandler = async (e) => {
+  const insertClickHandler = useCallback(async () => {
+  try {
     setIsUploading(true);
     const message = textAreaValue.trim();
     if (message.length === 0 && uploads.length === 0) {
-      alert("Please enter a message or upload an image");
+      toast.error("Please enter a message or upload an image");
+      setIsUploading(false);
       return;
     }
-  
+
+    // show toast the chat is being uploaded
+    toast.loading("Uploading chat...");
     const chatUploads = await Promise.all(
       uploads.map(async (upload) => {
-        if (upload.type === "image") {
-          console.log("Uploading image:", upload.name); // Log uploading status
-          let file;
-          if (typeof upload.file === 'string' && upload.file.startsWith('data:')) {
-            // If the upload is a base64 image string, convert it to a Blob
-            file = dataURItoBlob(upload.file);
+        try {
+          if (upload.type === "image") {
+            console.log("Compressing image:", upload.name);
+            const file = upload.file instanceof Blob ? upload.file : dataURItoBlob(upload.file);
+            const compressedFile = await imageCompression(file, {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1920,
+            });
+
+            console.log("Uploading image:", upload.name);
+            const result = await base(compressedFile, {
+              publicKey: "8c1816e1b2b84ba30ae9",
+              store: false,
+              metadata: {
+                subsystem: "uploader",
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+              },
+            });
+            const fileId = Object.values(result)[0];
+            return {
+              id: fileId,
+              type: upload.type,
+              name: upload.name,
+              url: `https://ucarecdn.com/${fileId}/${upload.name}`,
+            };
           } else {
-            // If the upload is a File object, use it as is
-            file = upload.file;
+            return upload;
           }
-          const result = await base(file, {
-//             # Expire in 30 min, e.g., 1454903856
-// expire = int(time.time()) + 60 * 30
-// set expiry in 30 seconds
-            publicKey: "8c1816e1b2b84ba30ae9",
-            store: false,
-            metadata: {              
-              subsystem: "uploader",
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set TTL to 24 hours
-            },
-          });
-          const fileId = Object.values(result)[0];
-          return {
-            id: fileId, // Use the UUID returned from Uploadcare
-            type: upload.type,
-            name: upload.name,
-            url: `https://ucarecdn.com/${fileId}/${upload.name}`, // Use Uploadcare URL
-          };
-        } else {
-          return upload;
+        } catch (error) {
+          console.error("Error processing upload:", error);
+          toast.error("Error processing upload");
+          return null;
         }
       })
     );
-  
+    // remove the loading toast
+    toast.remove();
+
+
     const chat = {
       id: new Date().getTime().toString(),
-      message: message,
-      uploads: chatUploads,
+      message,
+      uploads: chatUploads.filter(Boolean),
     };
-    const newData = [...chatData , chat];
+    const newData = [...chatData, chat];
     await updateChatHistory(newData);
-    // await setChatData((prevChatData) => [...prevChatData, chat]);
     setTextAreaValue("");
     setUploads([]);
     setIsUploading(false);
-  };
+  } catch (error) {
+    console.error("Error in insert click handler:", error);
+    toast.error("Error while inserting content");
+    setIsUploading(false);
+  }
+}, [chatData, textAreaValue, uploads, updateChatHistory]);
 
-  const textPasteHandler = (e) => {
+
+ const textPasteHandler = useCallback((e) => {
+  try {
     const pastedText = (e.clipboardData || window.clipboardData).getData("text/plain");
-    setTextAreaValue(prevValue => prevValue + pastedText);
-  };
+    setTextAreaValue((prevValue) => prevValue + pastedText);
+  } catch (error) {
+    console.error("Error in text paste handler:", error);
+    toast.error("Error in text paste handler");
+  }
+}, []);
 
-  const imagePasteHandler = (e) => {
+const imagePasteHandler = useCallback((e) => {
+  try {
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
     const newUploads = [...uploads];
 
     for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf("image") !== -1) {
-        const blob = items[i].getAsFile();
-        const reader = new FileReader();
-        const itemType = items[i].type;
-        reader.onloadend = function () {
-          const base64data = reader.result;
-          if (uploads.some((upload) => upload.file === base64data)) {
-            alert("This image has already been uploaded");
-            return;
-          }
-          const extension = itemType.split("/")[1];
-          const newUpload = {
-            id: new Date().getTime().toString(),
-            type: "image",
-            name: `image_${new Date().getTime()}.${extension}`,
-            file: base64data,
-            url: URL.createObjectURL(blob),
+      try {
+        if (items[i].type.indexOf("image") !== -1) {
+          const blob = items[i].getAsFile();
+          const reader = new FileReader();
+          const itemType = items[i].type;
+          reader.onloadend = function () {
+            try {
+              const base64data = reader.result;
+              if (uploads.some((upload) => upload.file === base64data)) {
+                toast.error("This image has already been uploaded");
+                return;
+              }
+              const extension = itemType.split("/")[1];
+              const newUpload = {
+                id: new Date().getTime().toString(),
+                type: "image",
+                name: `image_${new Date().getTime()}.${extension}`,
+                file: base64data,
+                url: URL.createObjectURL(blob),
+              };
+              newUploads.push(newUpload);
+              setUploads(newUploads);
+            } catch (error) {
+              console.error("Error in reader onloadend:", error);
+              toast.error("Error in reader onloadend");
+            }
           };
-          newUploads.push(newUpload);
-          setUploads(newUploads);
-        };
-        reader.readAsDataURL(blob);
+          reader.readAsDataURL(blob);
+        }
+      } catch (error) {
+        console.error("Error processing item:", error);
+        toast.error("Error processing item");
       }
     }
-  };
+  } catch (error) {
+    console.error("Error in image paste handler:", error);
+    toast.error("Error while pasting image");
+  }
+}, [uploads]);
 
-  const pasteHandler = (e) => {
+const pasteHandler = useCallback((e) => {
+  try {
     e.preventDefault();
     textPasteHandler(e);
     imagePasteHandler(e);
-  };
+  } catch (error) {
+    console.error("Error in paste handler:", error);
+    toast.error("Error while pasting content");
+  }
+}, [textPasteHandler, imagePasteHandler]);
 
-  // Helper function to convert a base64 string to a Blob
-  function dataURItoBlob(dataURI) {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+  const dataURItoBlob = useCallback((dataURI) => {
+  try {
+    const byteString = atob(dataURI.split(",")[1]);
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
 
@@ -199,12 +267,18 @@ const page = () => {
     }
 
     return new Blob([ab], { type: mimeString });
+  } catch (error) {
+    console.error("Error in data URI to blob conversion:", error);
+    toast.error("Error in data URI to blob conversion");
+    return null;
   }
-
+}, []);
+  
   return (
     <div className="w-full h-full flex justify-center items-end">
-      <div className=" h-full w-[70%]  flex flex-col justify-start items-center">
-        <div className=" w-full overflow-hidden py-3 flex-1 h-full">
+      <Toaster />
+      <div className="h-full w-[70%] flex flex-col justify-start items-center">
+        <div className="w-full overflow-hidden py-3 flex-1 h-full">
           <ChatBox chatData={chatData} />
         </div>
         <div className="Input-Area w-full flex justify-center items-center mb-5 max-h-fit relative">
@@ -224,51 +298,47 @@ const page = () => {
             onClick={fileUploadClickHandler}
             className="file-upload-button group bg-transparent border-[1px] duration-200 hover:border-[#fafafa] border-[#fafafa]/15 rounded-md h-full aspect-square mr-2 flex justify-center items-center"
           >
-            {
-              <div className="relative w-[50%] aspect-square flex justify-center items-center ">
-                {isUploading ? (
-                  <Spinner size="md" color="current" />
-                ) : (
-                  <NextImage
-                    src="/Upload.svg"
-                    fill={true}
-                    alt="send"
-                    className="object-cover w-full h-full duration-200 opacity-50 group-hover:opacity-100"
-                  />
-                )}
-              </div>
-            }
+            <div className="relative w-[50%] aspect-square flex justify-center items-center">
+              {isUploading ? (
+                <Spinner size="md" color="current" />
+              ) : (
+                <NextImage
+                  src="/Upload.svg"
+                  fill={true}
+                  alt="send"
+                  className="object-cover w-full h-full duration-200 opacity-50 group-hover:opacity-100"
+                />
+              )}
+            </div>
           </button>
           <textarea
             value={textAreaValue}
             onChange={(e) => setTextAreaValue(e.target.value)}
             onPaste={pasteHandler}
-            className=" whitespace-pre-wrap text-area-input w-[90%] h-[70px] placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent  resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
+            className="whitespace-pre-wrap text-area-input w-[90%] h-[70px] placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
             placeholder="Type your message here"
           ></textarea>
           <button
             onClick={insertClickHandler}
             className="insert-button aspect-video flex justify-center items-center h-full hover:bg-yellow-300 bg-yellow-400 text-black text-lg font-medium tracking-wide rounded-md ml-2"
           >
-            {
-              <div className="relative h-[50%] aspect-square flex justify-center items-center">
-                {isUploading ? (
-                  <Spinner size="md" color="current" />
-                ) : (
-                  <NextImage
-                    src="/send.svg"
-                    fill={true}
-                    alt="send"
-                    className="object-cover w-full h-full"
-                  />
-                )}
-              </div>
-            }
+            <div className="relative h-[50%] aspect-square flex justify-center items-center">
+              {isUploading ? (
+                <Spinner size="md" color="current" />
+              ) : (
+                <NextImage
+                  src="/send.svg"
+                  fill={true}
+                  alt="send"
+                  className="object-cover w-full h-full"
+                />
+              )}
+            </div>
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default page;
+  };
+  
+  export default page;

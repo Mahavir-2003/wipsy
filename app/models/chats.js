@@ -9,11 +9,7 @@ const chatSchema = new Schema({
         type: Array,
         default: [],
     },
-    expiryDate: {
-        type: Date,
-        default: Date.now + 86400,
-    }
-});
+},{timestamps: true});
 
 chatSchema.index({chatID: 1},{expireAfterSeconds: 86400});
 

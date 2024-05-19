@@ -12,8 +12,6 @@ export async function POST(req, res) {
         return NextResponse.json({ error: "chatID is required" }, {status: 400});
     }
 
-    console.log("Chat history to update : ", chatHistory);
-    // find and update the chat with the given ID
     try{
         // update the chat with the given ID
         var chat = await Chat.findOneAndUpdate({chatID : chatID}, {chatHistory : chatHistory}, {new: true});

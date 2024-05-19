@@ -6,7 +6,6 @@ export async function POST(req, res) {
     await connectDB();
     const data = await req.json();
     const { chatID } = data;
-    console.log(chatID);
 
     if (!chatID) {
         return NextResponse.json({ error: "chatID is required" }, {status: 400});
