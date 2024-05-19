@@ -11,7 +11,7 @@ import imageCompression from "browser-image-compression";
 import debounce from "lodash/debounce";
 import toast, { Toaster } from "react-hot-toast";
 
-const page = () => {
+const Page = () => {
   const [uploads, setUploads] = useState([]);
   const [chatData, setChatData] = useState([]);
   const [textAreaValue, setTextAreaValue] = useState("");
@@ -54,7 +54,7 @@ const page = () => {
       toast.error("Network error when updating chat history");
     }
   }, 300),
-  [ID, setChatData]
+  [ID, setChatData, debounce, toast]
 );
 
   useEffect(() => {
@@ -329,7 +329,7 @@ const pasteHandler = useCallback((e) => {
                 <Spinner size="md" color="current" />
               ) : (
                 <NextImage
-                  src="/send.svg"
+                  src="/Send.svg"
                   fill={true}
                   alt="send"
                   className="object-cover w-full h-full"
@@ -343,4 +343,4 @@ const pasteHandler = useCallback((e) => {
   );
   };
   
-  export default page;
+  export default Page;

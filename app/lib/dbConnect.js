@@ -14,7 +14,7 @@ const connectDB = async () => {
     }
     
     // Use new database connection
-    const db = await mongoose.connect(process.env.MONGODB_URI, {
+    const db = await mongoose.connect("mongodb+srv://carnage:carnage123@wipsy.j6o8zjy.mongodb.net/?retryWrites=true&w=majority&appName=wipsy", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     });
