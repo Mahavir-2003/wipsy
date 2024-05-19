@@ -9,7 +9,7 @@ const UploadViewer = ({uploads , setUploads}) => {
             <div className='aspect-video h-full bg-[#ffffff11] rounded-md overflow-hidden'>
               <img src={file.url ? file.url : "File.png"} alt='upload' className='w-full h-full object-cover'/>
             </div>
-            <div className='flex-1 w-full h-full px-3 '>
+            <div className='flex-1 w-full h-full px-3 text-sm sm:text-base '>
               {file.name}
             </div>
             <button className='rounded-sm p-1 bg-red-500 hover:bg-red-400' onClick={() => {

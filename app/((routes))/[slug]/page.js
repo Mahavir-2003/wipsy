@@ -278,13 +278,13 @@ const pasteHandler = useCallback((e) => {
   return (
     <div className="w-full h-full flex justify-center items-end">
       <Toaster />
-      <div className="h-full w-[70%] flex flex-col justify-start items-center">
+      <div className="h-full lg:w-[70%] w-[96%] flex flex-col justify-start items-center">
         <div className="w-full overflow-hidden py-3 flex-1 h-full">
           <ChatBox chatData={chatData} />
         </div>
         <div className="Input-Area w-full flex justify-center items-center mb-5 max-h-fit relative">
           <div
-            className={`absolute top-0 translate-y-[-100%] left-0 w-[40%] aspect-video pb-3 ${
+            className={`absolute top-0 translate-y-[-100%] left-0 bg-[#09090b] w-full sm:w-[60%] md:w-[40%] aspect-video pb-3 ${
               uploads.length === 0 ? "hidden" : "block"
             }`}
           >
@@ -316,12 +316,12 @@ const pasteHandler = useCallback((e) => {
             value={textAreaValue}
             onChange={(e) => setTextAreaValue(e.target.value)}
             onPaste={pasteHandler}
-            className="whitespace-pre-wrap text-area-input w-[90%] h-[70px] placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
+            className="whitespace-pre-wrap text-area-input w-[90%] h-[50px] md:h-[70px] placeholder:text-sm md:placeholder:text-base placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
             placeholder="Type your message here"
           ></textarea>
           <button
             onClick={insertClickHandler}
-            className="insert-button aspect-video flex justify-center items-center h-full hover:bg-yellow-300 bg-yellow-400 text-black text-lg font-medium tracking-wide rounded-md ml-2"
+            className="insert-button aspect-square md:aspect-video flex justify-center items-center h-full hover:bg-yellow-300 bg-yellow-400 text-black text-lg font-medium tracking-wide rounded-md ml-2"
           >
             <div className="relative h-[50%] aspect-square flex justify-center items-center">
               {isUploading ? (

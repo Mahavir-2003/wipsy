@@ -94,7 +94,7 @@ const ChatBox = ({ chatData }) => {
                 <div key={upload.id} className="mr-2 mb-2 ">
                   {upload.type === 'image' ? (
                     <div className='relative min-w-fit min-h-fit group '>
-                      <div key={upload.id} onClick={() => downloadFile(upload.url, upload.name)} className='absolute m-1 p-2 bg-[#151515] rounded-md right-0 bottom-0 opacity-0 group-hover:opacity-100 hover:cursor-pointer'>
+                      <div key={upload.id} onClick={() => downloadFile(upload.url, upload.name)} className='absolute m-1 p-2 bg-[#151515] rounded-md right-0 bottom-0 md:opacity-0 opacity-100 group-hover:opacity-100 hover:cursor-pointer'>
                         <GoDownload size={22} />
                       </div>
                       <img src={upload.url} alt={upload.name} className="h-[200px] aspect-auto rounded-md" />
