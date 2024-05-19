@@ -37,7 +37,7 @@ const components = {
         </CopyToClipboard>
         </div>
         <div className=' w-full px-2'>
-        <SyntaxHighlighter className="code-block" language={match[1]} style={nightOwl} customStyle={customStyle} PreTag="div" children={String(children).replace(/\n$/, '')} {...props} />
+        <SyntaxHighlighter className="code-block" showLineNumbers={true} language={match[1]} style={nightOwl} customStyle={customStyle} PreTag="div" children={String(children).replace(/\n$/, '')} {...props} />
         </div>
        
       </div>
