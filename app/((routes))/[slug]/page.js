@@ -26,22 +26,24 @@ const Page = () => {
       const response = await axios.post("/api/fetch", { chatID: ID });
       if (response.status == 200) {
         setChatData(response.data.chatHistory);
+        toast.remove();
+        toast.success("fetched");
         toast(`Your chat will expire in ${response.data.expiryTime}`, {
           icon: "🕒",
+          position: "top-right",
         });
       } else {
         console.error(
           "Server error when fetching chat history:",
           response.data.error
         );
+        toast.remove();
         toast.error("Server error when fetching chat history");
       }
     } catch (error) {
+      toast.remove();
       console.error("Network error when fetching chat history:", error);
       toast.error("Network error when fetching chat history");
-    }finally{
-      toast.remove();
-      toast.success("fetched");
     }
   }, [ID, setChatData]);
 
