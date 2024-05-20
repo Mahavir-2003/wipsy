@@ -57,6 +57,11 @@ const components = {
       </code>
     );
   },
+  p: ({ node, ...props }) => {
+    return (
+      <span className="whitespace-pre-wrap" {...props} />
+    );
+  },
 };
 
 const downloadFile = async (url, name) => {
