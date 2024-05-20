@@ -18,6 +18,20 @@ const Page = () => {
   const { slug } = useParams();
   const [ID, setID] = useState(slug);
   const [isUploading, setIsUploading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 1280); // Adjust the width as per your requirement
+  };
+
+  window.addEventListener('resize', handleResize);
+  handleResize(); // Call it initially to set the initial value
+
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []);
 
   const fetchChatHistory = useCallback(async () => {
     // show toast the chat is being fetched
@@ -354,9 +368,16 @@ const Page = () => {
             onChange={(e) => setTextAreaValue(e.target.value)}
             onPaste={pasteHandler}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                insertClickHandler();
+              if (e.key === 'Enter') {
+                if (isMobile) {
+                  // On mobile devices, create a new line
+                  e.preventDefault();
+                  setTextAreaValue((prevValue) => prevValue + '\n');
+                } else if (!e.shiftKey) {
+                  // On desktop devices, send the message if Shift is not pressed
+                  e.preventDefault();
+                  insertClickHandler();
+                }
               }
             }}
             className="whitespace-pre-wrap text-area-input w-[90%] h-[50px] md:h-[70px] placeholder:text-sm md:placeholder:text-base placeholder:text-[#fafafa]/30 placeholder:font-light bg-transparent resize-none border px-3 pt-3 rounded-md focus:outline-none focus:border-[#fafafa]/70 border-[#fafafa]/15"
