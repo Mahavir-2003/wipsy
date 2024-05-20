@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const chatSchema = new Schema({
-    chatID : {
+    chatID: {
         type: String,
         required: true,
     },
@@ -9,9 +9,9 @@ const chatSchema = new Schema({
         type: Array,
         default: [],
     },
-},{timestamps: true});
+}, { timestamps: true });
 
-chatSchema.index({chatID: 1},{expireAfterSeconds: 86400});
+chatSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
 const Chat = mongoose.models.Chat || mongoose.model('Chat', chatSchema);
 
