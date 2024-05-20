@@ -20,6 +20,8 @@ const Page = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const fetchChatHistory = useCallback(async () => {
+    // show toast the chat is being fetched
+    toast.loading("Fetching chat history...");
     try {
       const response = await axios.post("/api/fetch", { chatID: ID });
       if (response.status == 200) {
@@ -37,6 +39,9 @@ const Page = () => {
     } catch (error) {
       console.error("Network error when fetching chat history:", error);
       toast.error("Network error when fetching chat history");
+    }finally{
+      toast.remove();
+      toast.success("fetched");
     }
   }, [ID, setChatData]);
 
