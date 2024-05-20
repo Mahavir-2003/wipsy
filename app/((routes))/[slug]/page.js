@@ -30,7 +30,6 @@ const Page = () => {
         toast.success("fetched");
         toast(`Your chat will expire in ${response.data.expiryTime}`, {
           icon: "🕒",
-          position: "top-right",
         });
       } else {
         console.error(
