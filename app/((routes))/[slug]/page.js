@@ -308,7 +308,7 @@ const Page = () => {
         <div className="w-full overflow-hidden py-3 flex-1 h-full">
           <ChatBox chatData={chatData} />
         </div>
-        <div className="Input-Area w-full flex justify-center items-center mb-5 max-h-fit relative">
+        <div className={`Input-Area ${isUploading ? "pointer-events-none cursor-not-allowed" : "pointer-events-auto"} w-full flex justify-center items-center mb-5 max-h-fit relative`}>
           <div
             className={`absolute top-0 translate-y-[-100%] left-0 bg-[#09090b] w-full sm:w-[60%] md:w-[40%] aspect-video pb-3 ${
               uploads.length === 0 ? "hidden" : "block"
