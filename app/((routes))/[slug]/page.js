@@ -27,10 +27,14 @@ const Page = () => {
       if (response.status == 200) {
         setChatData(response.data.chatHistory);
         toast.remove();
-        toast.success("fetched");
-        toast(`Your chat will expire in ${response.data.expiryTime}`, {
-          icon: "🕒",
+        toast.success("fetched" , {
+          duration : 1500
         });
+        setTimeout(() => {
+          toast(`Your chat will expire in ${response.data.expiryTime}`, {
+            icon: "🕒",
+          });
+        }, 2000); // 2000 milliseconds = 2 seconds
       } else {
         console.error(
           "Server error when fetching chat history:",
@@ -309,7 +313,13 @@ const Page = () => {
         <div className="w-full overflow-hidden py-3 flex-1 h-full">
           <ChatBox chatData={chatData} />
         </div>
-        <div className={`Input-Area ${isUploading ? "pointer-events-none cursor-not-allowed" : "pointer-events-auto"} w-full flex justify-center items-center mb-5 max-h-fit relative`}>
+        <div
+          className={`Input-Area ${
+            isUploading
+              ? "pointer-events-none cursor-not-allowed"
+              : "pointer-events-auto"
+          } w-full flex justify-center items-center mb-5 max-h-fit relative`}
+        >
           <div
             className={`absolute top-0 translate-y-[-100%] left-0 bg-[#09090b] w-full sm:w-[60%] md:w-[40%] aspect-video pb-3 ${
               uploads.length === 0 ? "hidden" : "block"
