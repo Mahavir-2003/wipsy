@@ -30,7 +30,7 @@ Wipsy supports Markdown syntax, allowing you to format your text with headings, 
 
 To create code blocks, surround your code with triple backticks (```) followed by the language extension. For example:
 ```txt
-1 ```js <-(your code file extension)
+1 ```js <==(replace with your file extension)
 2  // your code goes here
 3 ```
 ```
