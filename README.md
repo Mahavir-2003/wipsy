@@ -29,10 +29,11 @@ Wipsy supports Markdown syntax, allowing you to format your text with headings, 
 ### Code Blocks
 
 To create code blocks, surround your code with triple backticks (```) followed by the language extension. For example:
-##### ```js <-(your code file extension)
-##### // your code goes here
-##### ```
-
+```md
+#### ```js <-(your code file extension)
+#### // your code goes here
+#### ```
+```
 ### Image Upload
 
 You can upload images directly into the input field by pasting the image content or using the built-in file upload functionality.
