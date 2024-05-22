@@ -46,4 +46,4 @@ You can upload images directly into the input field by pasting the image content
 
 ## Contributing
 
-If you would like to contribute to the development of Wipsy, feel free to submit issues or pull requests to the project's GitHub repository: [https://github.com/your-repo-url](https://github.com/your-repo-url)
+If you would like to contribute to the development of Wipsy, feel free to submit issues or pull requests to the project's GitHub repository: [https://github.com/Mahavir-2003/wipsy](https://github.com/Mahavir-2003/wipsy)
