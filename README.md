@@ -32,7 +32,7 @@ To create code blocks, surround your code with triple backticks (```) followed b
 ```txt
 ```js <-(your code file extension)
    // your code goes here
-```
+*```*
 ```
 ### Image Upload
 
