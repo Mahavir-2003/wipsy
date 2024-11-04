@@ -7,6 +7,7 @@ import CopyToClipboard from "react-copy-to-clipboard";
 import { GoCopy } from "react-icons/go";
 import { GoDownload } from "react-icons/go";
 import toast from "react-hot-toast";
+import Image from 'next/image';
 
 const customStyle = {
   width: "100%",
@@ -123,9 +124,11 @@ const ChatBox = ({ chatData }) => {
                       >
                         <GoDownload size={22} />
                       </div>
-                      <img
+                      <Image
                         src={upload.url}
                         alt={upload.name}
+                        width={200}
+                        height={200}
                         className="h-[200px] aspect-auto rounded-md"
                       />
                     </div>

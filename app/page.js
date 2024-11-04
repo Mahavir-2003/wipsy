@@ -48,7 +48,7 @@ export default function Home() {
           <section>
             <h2 className="mb-4 text-2xl font-semibold text-indigo-400">What is Wipsy?</h2>
             <p className="text-lg leading-relaxed text-gray-300">
-              Wipsy is a web-based platform designed for quick note-taking, code sharing, and collaboration. It's perfect for students and professionals who need to quickly capture and share work or notes without the hassle of accounts or authentication. With Wipsy, you can create temporary, shareable spaces for your content that automatically expire after 24 hours, ensuring your data remains private and secure.
+              Wipsy is a web-based platform designed for quick note-taking, code sharing, and collaboration. It&apos;s perfect for students and professionals who need to quickly capture and share work or notes without the hassle of accounts or authentication. With Wipsy, you can create temporary, shareable spaces for your content that automatically expire after 24 hours, ensuring your data remains private and secure.
             </p>
           </section>
 
@@ -59,7 +59,6 @@ export default function Home() {
               <li>Click the send button or press Enter to create or join a chat.</li>
               <li>Start writing text, using Markdown syntax, or uploading images.</li>
               <li>Share the chat ID with others who need access to the content.</li>
-              <li>Collaborate in real-time with your team or classmates.</li>
             </ol>
           </section>
 
@@ -69,7 +68,7 @@ export default function Home() {
             <div className="space-y-6">
               <div className="p-4 bg-[#1a1a1a] rounded-lg">
                 <h3 className="mb-2 text-xl font-semibold text-indigo-300">Code Blocks</h3>
-                <p className="mb-2 text-gray-300">To create a code block, use triple backticks (```) followed by the language name:</p>
+                <p className="mb-2 text-gray-300">To create a code block, use triple backticks (```) followed by the language name or file extension:</p>
                 <pre className="p-3 bg-[#2a2a2a] rounded text-sm text-gray-200">
 {`\`\`\`python
 def hello_world():
@@ -82,7 +81,7 @@ hello_world()
                 <div className="p-3 bg-[#2a2a2a] rounded">
                   <code className="text-sm text-indigo-200">
                     <span className="text-blue-300">def</span> hello_world():
-                    <br />    <span className="text-green-300">print</span>(<span className="text-yellow-300">"Hello, Wipsy!"</span>)
+                    <br />    <span className="text-green-300">&nbsp;&nbsp;&nbsp;  print</span>(<span className="text-yellow-300">"Hello, Wipsy!"</span>)
                     <br />
                     <br />hello_world()
                   </code>
@@ -124,7 +123,7 @@ hello_world()
           <section>
             <h2 className="mb-4 text-2xl font-semibold text-indigo-400">Privacy & Security</h2>
             <p className="text-lg leading-relaxed text-gray-300">
-              Wipsy is designed with privacy and security in mind. All chats and uploaded content are automatically deleted after 24 hours, ensuring that your data doesn't linger on our servers. While we strive to provide a secure platform, please do not share sensitive or personal information. Use Wipsy responsibly and be mindful of the content you share, especially when collaborating with others.
+              Wipsy is designed with privacy and security in mind. All chats and uploaded content are automatically deleted after 24 hours, ensuring that your data doesn&apos;t linger on our servers. While we strive to provide a secure platform, please do not share sensitive or personal information. Use Wipsy responsibly and be mindful of the content you share, especially when collaborating with others.
             </p>
           </section>
         </div>
