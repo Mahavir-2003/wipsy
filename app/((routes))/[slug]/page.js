@@ -1,7 +1,7 @@
 "use client";
-import ChatBox from "../../components/ChatBox";
-import UploadViewer from "../../components/UploadViewer";
-import Navbar from "../../components/Navbar";
+import ChatBox from "../../../components/ChatBox";
+import UploadViewer from "../../../components/UploadViewer";
+import Navbar from "../../../components/Navbar";
 import { Spinner } from "@nextui-org/spinner";
 import NextImage from "next/image";
 import { useParams } from "next/navigation";
@@ -13,6 +13,7 @@ import debounce from "lodash/debounce";
 import toast, { Toaster } from "react-hot-toast";
 import TurndownService from "turndown";
 import { CircularProgress } from "@nextui-org/progress";
+import { TTL_SECONDS } from '../../../lib/constants';
 
 const Page = () => {
   const [uploads, setUploads] = useState([]);
@@ -23,6 +24,7 @@ const Page = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [chatSettings, setChatSettings] = useState({ isPermanent: false });
 
 useEffect(() => {
   const handleResize = () => {
@@ -41,41 +43,55 @@ useEffect(() => {
     setIsLoading(true);
     try {
       const response = await axios.post("/api/fetch", { chatID: ID });
-      if (response.status == 200) {
-        setChatData(response.data.chatHistory);
+      if (response.status === 200 && response.data.success) {
+        setChatData(response.data.data.chatHistory || []);
+        setChatSettings({
+          isPermanent: response.data.data.chat.isPermanent
+        });
         setIsLoading(false);
         
-        // Calculate remaining time
-        const chat = response.data.chat;
-        if (chat && chat.createdAt) {
-          const createdAt = new Date(chat.createdAt);
-          const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
-          const remainingTime = expiresAt - new Date();
-          const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
-          const remainingMinutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-          
+        // Show appropriate toast based on chat status
+        const chat = response.data.data.chat;
+        if (chat.isPermanent) {
           toast.success(
-            `Chat expires in ${remainingHours}h ${remainingMinutes}m`, 
+            'This chat is permanently stored 🔒', 
             {
               duration: 4000,
-              icon: '⏳'
+              icon: '💾'
             }
           );
+        } else {
+          const expiresAt = new Date(chat.updatedAt).getTime() + (TTL_SECONDS * 1000);
+          const remainingTime = expiresAt - Date.now();
+          const remainingSeconds = Math.floor(remainingTime / 1000);
+          
+          if (remainingSeconds <= 0) {
+            toast.error(
+              'Chat will expire soon!', 
+              {
+                duration: 4000,
+                icon: '⚠️'
+              }
+            );
+          } else {
+            toast.success(
+              `Chat expires in ${remainingSeconds} seconds`, 
+              {
+                duration: 4000,
+                icon: '⏳'
+              }
+            );
+          }
         }
       } else {
-        console.error(
-          "Server error when fetching chat history:",
-          response.data.error
-        );
         setIsLoading(false);
-        toast.error("Server error when fetching chat history");
+        toast.error(response.data.error || "Error fetching chat history");
       }
     } catch (error) {
       setIsLoading(false);
-      console.error("Network error when fetching chat history:", error);
-      toast.error("Network error when fetching chat history");
+      toast.error("Error fetching chat history");
     }
-  }, [ID, setChatData]);
+  }, [ID]);
 
   const updateChatHistory = useCallback(
     debounce(async (chatHistory) => {
@@ -84,22 +100,31 @@ useEffect(() => {
           chatID: ID,
           chatHistory,
         });
-        if (response.status == 200) {
-          setChatData(response.data.chatHistory);
-          toast.success("saved");
+        
+        if (response.status === 200 && response.data.success) {
+          // Update local state immediately
+          setChatData(chatHistory);
+          toast.success("Saved successfully", {
+            duration: 2000,
+            icon: '✅'
+          });
         } else {
           console.error(
             "Server error when updating chat history:",
             response.data.error
           );
-          toast.error("Server error when updating chat history");
+          toast.error("Failed to save changes");
+          // Refresh chat data from server on error
+          fetchChatHistory();
         }
       } catch (error) {
         console.error("Network error when updating chat history:", error);
-        toast.error("Network error when updating chat history");
+        toast.error("Failed to save changes");
+        // Refresh chat data from server on error
+        fetchChatHistory();
       }
     }, 300),
-    [ID, setChatData, debounce, toast]
+    [ID, setChatData, fetchChatHistory]
   );
 
   useEffect(() => {
@@ -177,7 +202,6 @@ useEffect(() => {
         return;
       }
 
-      // show toast the chat is being uploaded
       toast.loading("Uploading chat...");
       const chatUploads = await Promise.all(
         uploads.map(async (upload) => {
@@ -199,7 +223,7 @@ useEffect(() => {
                 store: false,
                 metadata: {
                   subsystem: "uploader",
-                  expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                  expiresAt: new Date(Date.now() + (TTL_SECONDS * 1000)),
                 },
               });
               const fileId = Object.values(result)[0];
@@ -219,22 +243,23 @@ useEffect(() => {
           }
         })
       );
-      // remove the loading toast
-      toast.remove();
+      toast.dismiss();
 
-      const chat = {
-        id: new Date().getTime().toString(),
+      const newChat = {
         message,
         uploads: chatUploads.filter(Boolean),
       };
-      const newData = [...chatData, chat];
+      
+      const newData = [...chatData, newChat];
       await updateChatHistory(newData);
+      
+      // Clear the form after successful upload
       setTextAreaValue("");
       setUploads([]);
       setIsUploading(false);
     } catch (error) {
-      console.error("Error in insert click handler:", error);
-      toast.error("Error while inserting content");
+      console.error("Error in insert handler:", error);
+      toast.error("Failed to send message");
       setIsUploading(false);
     }
   }, [chatData, textAreaValue, uploads, updateChatHistory]);
@@ -584,6 +609,8 @@ useEffect(() => {
     <>
       <Navbar
         chatID={ID}
+        isPermanent={chatSettings.isPermanent}
+        onSettingsChange={fetchChatHistory}
       />
       <Toaster 
         position="top-center"

@@ -163,7 +163,7 @@ const downloadFile = async (url, name) => {
     toast.error("An error occurred while downloading the file.");
   }
 };
-const ChatBox = ({ chatData }) => {
+const ChatBox = ({ chatData = [] }) => {
   // Add ref for the chat container
   const chatContainerRef = useRef(null);
 
@@ -177,6 +177,11 @@ const ChatBox = ({ chatData }) => {
     }
   }, [chatData]);
 
+  // Add null check for chatData
+  if (!Array.isArray(chatData)) {
+    return null; // or return a loading state/error message
+  }
+
   return (
     <div 
       ref={chatContainerRef}
@@ -187,31 +192,31 @@ const ChatBox = ({ chatData }) => {
           key={index}
           className="flex flex-col justify-start items-start w-full"
         >
-          <div className="flex flex-col justify-center items-start  w-full">
+          <div className="flex flex-col justify-center items-start w-full">
             <ReactMarkdown
-              className=" w-full"
+              className="w-full"
               remarkPlugins={[remarkGfm]}
               components={components}
             >
-              {chat.message}
+              {chat?.message || ''}
             </ReactMarkdown>
           </div>
-          {chat.uploads?.length > 0 && (
-            <div className="flex flex-wrap flex-row justify-start items-start mt-2 ">
+          {Array.isArray(chat?.uploads) && chat.uploads.length > 0 && (
+            <div className="flex flex-wrap flex-row justify-start items-start mt-2">
               {chat.uploads.map((upload, index) => (
-                <div key={upload.id} className="mr-2 mb-2 ">
-                  {upload.type === "image" ? (
-                    <div className="relative min-w-fit min-h-fit group ">
+                <div key={upload?.id || index} className="mr-2 mb-2">
+                  {upload?.type === "image" ? (
+                    <div className="relative min-w-fit min-h-fit group">
                       <div
                         key={upload.id}
-                        onClick={() => downloadFile(upload.url, upload.name)}
+                        onClick={() => upload?.url && downloadFile(upload.url, upload?.name || 'image')}
                         className="absolute m-1 p-2 bg-[#151515] rounded-md right-0 bottom-0 md:opacity-0 opacity-100 group-hover:opacity-100 hover:cursor-pointer"
                       >
                         <GoDownload size={22} />
                       </div>
                       <Image
-                        src={upload.url}
-                        alt={upload.name}
+                        src={upload?.url || ''}
+                        alt={upload?.name || 'image'}
                         width={200}
                         height={200}
                         className="h-[200px] aspect-auto rounded-md object-cover"

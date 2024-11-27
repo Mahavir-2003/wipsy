@@ -1,31 +1,57 @@
-import connectDB from '../../lib/dbConnect';
-import Chat from '../../models/Chat';
+import connectDB from '../../../db/connect';
+import Chat from '../../../models/Chat';
+import { TTL_SECONDS } from '../../../lib/constants';
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
-    await connectDB();
-    const data = await req.json();
-    const { chatID } = data;
-
-    if (!chatID) {
-        return NextResponse.json({ error: "chatID is required" }, {status: 400});
-    }
-
     try {
-        var chat = await Chat.findOne({ chatID });
+        await connectDB();
+        const { chatID } = await req.json().catch(() => ({}));
 
-        if(!chat) {
-            chat = await Chat.create({ chatID });
+        if (!chatID || typeof chatID !== 'string') {
+            return NextResponse.json({ 
+                success: false,
+                error: "Valid chatID required" 
+            }, { status: 400 });
         }
+
+        const sanitizedChatID = chatID
+            .replace(/[^a-zA-Z0-9-]/g, '')
+            .slice(0, 100);
+
+        let chat = await Chat.findOne({ chatID: sanitizedChatID });
+
+        if (!chat) {
+            chat = await Chat.create({ 
+                chatID: sanitizedChatID,
+                chatHistory: [],
+                isPermanent: false
+            });
+            console.log('New chat created:', chat);
+        }
+
+        const expiresAt = chat.isPermanent ? 
+            null : 
+            new Date(Date.now() + (TTL_SECONDS * 1000));
         
         return NextResponse.json({ 
-            chatHistory: chat.chatHistory,
-            chat: {
-                createdAt: chat.createdAt
+            success: true,
+            data: {
+                chatHistory: chat.chatHistory || [],
+                chat: {
+                    isPermanent: chat.isPermanent,
+                    createdAt: chat.createdAt,
+                    updatedAt: chat.updatedAt,
+                    expiresAt: expiresAt
+                }
             }
-        }, {status: 200});
+        });
+
     } catch(err) {
-        console.log(err);
-        return NextResponse.json({ error: "Error fetching chat" }, {status: 500});
+        console.error("Error in fetch route:", err);
+        return NextResponse.json({ 
+            success: false,
+            error: "Server error" 
+        }, { status: 500 });
     }
 }
