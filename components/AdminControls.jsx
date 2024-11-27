@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Switch } from "./ui/switch";
@@ -21,6 +21,10 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
   const [open, setOpen] = useState(false);
   const [desiredState, setDesiredState] = useState(isPermanent);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setDesiredState(isPermanent);
+  }, [isPermanent]);
 
   const handleSubmit = async () => {
     if (!password) {
@@ -61,6 +65,7 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
           title: "Error",
           description: data.error || "Failed to update settings"
         });
+        setDesiredState(isPermanent);
       }
     } catch (error) {
       toast({
@@ -68,6 +73,7 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
         title: "Error",
         description: "Failed to update settings"
       });
+      setDesiredState(isPermanent);
     } finally {
       setLoading(false);
       setPassword('');

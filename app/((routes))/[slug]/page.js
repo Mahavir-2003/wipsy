@@ -15,6 +15,28 @@ import TurndownService from "turndown";
 import { CircularProgress } from "@nextui-org/progress";
 import { TTL_SECONDS } from '../../../lib/constants';
 
+const updateImageStorage = async (uuid, store) => {
+  try {
+    const response = await fetch(`https://api.uploadcare.com/files/${uuid}/storage/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Uploadcare.Simple ${process.env.NEXT_PUBLIC_UPLOADCARE_KEY}:${process.env.UPLOADCARE_SECRET_KEY}`,
+      },
+      body: JSON.stringify({ store })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to update storage: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating image storage:', error);
+    throw error;
+  }
+};
+
 const Page = () => {
   const [uploads, setUploads] = useState([]);
   const [chatData, setChatData] = useState([]);
@@ -208,10 +230,7 @@ useEffect(() => {
           try {
             if (upload.type === "image") {
               console.log("Compressing image:", upload.name);
-              const file =
-                upload.file instanceof Blob
-                  ? upload.file
-                  : dataURItoBlob(upload.file);
+              const file = upload.file instanceof Blob ? upload.file : dataURItoBlob(upload.file);
               const compressedFile = await imageCompression(file, {
                 maxSizeMB: 1,
                 maxWidthOrHeight: 1920,
@@ -220,10 +239,11 @@ useEffect(() => {
               console.log("Uploading image:", upload.name);
               const result = await base(compressedFile, {
                 publicKey: process.env.NEXT_PUBLIC_UPLOADCARE_KEY,
-                store: false,
+                store: chatSettings.isPermanent, // Store based on chat's permanent status
                 metadata: {
                   subsystem: "uploader",
-                  expiresAt: new Date(Date.now() + (TTL_SECONDS * 1000)),
+                  chatID: ID,
+                  isPermanent: chatSettings.isPermanent
                 },
               });
               const fileId = Object.values(result)[0];
@@ -232,10 +252,10 @@ useEffect(() => {
                 type: upload.type,
                 name: upload.name,
                 url: `https://ucarecdn.com/${fileId}/${upload.name}`,
+                uuid: fileId // Store the UUID for future reference
               };
-            } else {
-              return upload;
             }
+            return upload;
           } catch (error) {
             console.error("Error processing upload:", error);
             toast.error("Error processing upload");
@@ -253,7 +273,6 @@ useEffect(() => {
       const newData = [...chatData, newChat];
       await updateChatHistory(newData);
       
-      // Clear the form after successful upload
       setTextAreaValue("");
       setUploads([]);
       setIsUploading(false);
@@ -262,7 +281,7 @@ useEffect(() => {
       toast.error("Failed to send message");
       setIsUploading(false);
     }
-  }, [chatData, textAreaValue, uploads, updateChatHistory]);
+  }, [chatData, textAreaValue, uploads, updateChatHistory, chatSettings.isPermanent, ID]);
 
   const textPasteHandler = useCallback((e) => {
     try {
