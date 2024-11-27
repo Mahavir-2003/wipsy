@@ -239,11 +239,10 @@ useEffect(() => {
               console.log("Uploading image:", upload.name);
               const result = await base(compressedFile, {
                 publicKey: process.env.NEXT_PUBLIC_UPLOADCARE_KEY,
-                store: chatSettings.isPermanent, // Store based on chat's permanent status
+                store: true,
                 metadata: {
                   subsystem: "uploader",
                   chatID: ID,
-                  isPermanent: chatSettings.isPermanent
                 },
               });
               const fileId = Object.values(result)[0];
@@ -281,7 +280,7 @@ useEffect(() => {
       toast.error("Failed to send message");
       setIsUploading(false);
     }
-  }, [chatData, textAreaValue, uploads, updateChatHistory, chatSettings.isPermanent, ID]);
+  }, [chatData, textAreaValue, uploads, updateChatHistory, ID]);
 
   const textPasteHandler = useCallback((e) => {
     try {

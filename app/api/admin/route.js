@@ -2,16 +2,11 @@ import connectDB from "../../../db/connect";
 import Chat from "../../../models/Chat";
 import { TTL_SECONDS } from '../../../lib/constants';
 import { NextResponse } from "next/server";
-import { updateAllChatImages } from '../../../lib/uploadcare';
 
 export async function POST(req) {
     try {
-        // Connect to database
         await connectDB();
-
-        // Parse and validate request data
-        const data = await req.json().catch(() => ({}));
-        const { action, chatID, password } = data;
+        const { action, chatID, password } = await req.json().catch(() => ({}));
 
         // Validate inputs
         if (!chatID || typeof chatID !== 'string') {
@@ -41,7 +36,6 @@ export async function POST(req) {
             .replace(/[^a-zA-Z0-9-]/g, '')
             .slice(0, 100);
 
-        // Update chat permanence status
         const isPermanent = action === 'makePermanent';
         const chat = await Chat.findOne({ chatID: sanitizedChatID });
 
@@ -52,15 +46,7 @@ export async function POST(req) {
             }, { status: 404 });
         }
 
-        // Update storage status for all images in the chat
-        try {
-            await updateAllChatImages(chat.chatHistory, isPermanent);
-        } catch (error) {
-            console.error("Error updating image storage:", error);
-            // Continue with chat update even if image update fails
-        }
-
-        // Update chat permanence status
+        // Update chat permanence status only
         chat.isPermanent = isPermanent;
         await chat.save();
 
