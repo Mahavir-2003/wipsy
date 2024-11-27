@@ -93,7 +93,7 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
           <Settings className="h-4 w-4 text-white" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-[#18181b] border-[#27272a]">
+      <DialogContent className="dialog-responsive bg-[#18181b] border-[#27272a]">
         <DialogHeader>
           <DialogTitle className="text-white">Chat Settings</DialogTitle>
           <DialogDescription className="text-[#a1a1aa]">

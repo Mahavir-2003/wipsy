@@ -351,3 +351,9 @@ p {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .dialog-responsive {
+    @apply w-[90vw] max-w-[425px] max-h-[85vh] overflow-y-auto;
+  }
+}
