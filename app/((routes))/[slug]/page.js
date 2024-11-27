@@ -13,6 +13,8 @@ import toast, { Toaster } from "react-hot-toast";
 import TurndownService from "turndown";
 import AdminControls from '@/app/components/AdminControls';
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import { CircularProgress } from "@nextui-org/progress";
 
 const Page = () => {
   const [uploads, setUploads] = useState([]);
@@ -25,6 +27,8 @@ const Page = () => {
   const [chatSettings, setChatSettings] = useState({
     isPermanent: false
   });
+  const { toast: shadcnToast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
 useEffect(() => {
   const handleResize = () => {
@@ -40,35 +44,45 @@ useEffect(() => {
 }, []);
 
   const fetchChatHistory = useCallback(async () => {
-    // show toast the chat is being fetched
-    toast.loading("Fetching chat history...");
+    setIsLoading(true);
     try {
       const response = await axios.post("/api/fetch", { chatID: ID });
       if (response.status == 200) {
         setChatData(response.data.chatHistory);
-        toast.remove();
-        toast.success("fetched" , {
-          duration : 1500
+        setIsLoading(false);
+        
+        // Added emoji to expiry toast
+        shadcnToast({
+          title: "⏳ Chat Expiry",
+          description: `Your chat will expire in ${response.data.expiryTime}`,
+          duration: 5000,
+          className: "bg-[#18181b] text-white border border-[#27272a]"
         });
-        setTimeout(() => {
-          toast(`Your chat will expire in ${response.data.expiryTime}`, {
-            icon: "🕒",
-          });
-        }, 2000); // 2000 milliseconds = 2 seconds
+
       } else {
         console.error(
           "Server error when fetching chat history:",
           response.data.error
         );
-        toast.remove();
-        toast.error("Server error when fetching chat history");
+        setIsLoading(false);
+        // Added emoji to error toast
+        shadcnToast({
+          title: "❌ Error",
+          description: "Server error when fetching chat history",
+          className: "bg-[#18181b] text-white border border-[#27272a]"
+        });
       }
     } catch (error) {
-      toast.remove();
+      setIsLoading(false);
       console.error("Network error when fetching chat history:", error);
-      toast.error("Network error when fetching chat history");
+      // Added emoji to network error toast
+      shadcnToast({
+        title: "🌐 Network Error",
+        description: "Network error when fetching chat history",
+        className: "bg-[#18181b] text-white border border-[#27272a]"
+      });
     }
-  }, [ID, setChatData]);
+  }, [ID, setChatData, shadcnToast]);
 
   const updateChatHistory = useCallback(
     debounce(async (chatHistory) => {
@@ -548,7 +562,16 @@ useEffect(() => {
     (e) => {
       try {
         e.preventDefault();
-        textPasteHandler(e);
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        
+        // Check if there's an image in the clipboard
+        const hasImage = Array.from(items).some(item => item.type.indexOf("image") !== -1);
+        
+        // Only process text if there's no image
+        if (!hasImage) {
+          textPasteHandler(e);
+        }
+        
         imagePasteHandler(e);
       } catch (error) {
         console.error("Error in paste handler:", error);
@@ -582,7 +605,16 @@ useEffect(() => {
       <div className="w-full h-full flex justify-center items-end relative">
         <div className="h-full lg:w-[70%] w-[96%] flex flex-col justify-start items-center">
           <div className="w-full overflow-hidden py-3 flex-1 h-full">
-            <ChatBox chatData={chatData} />
+            {isLoading ? (
+              // Skeleton loading state
+              <div className="w-full h-full flex flex-col gap-4 p-4">
+                <div className="w-3/4 h-24 bg-[#27272a]/50 animate-pulse rounded-md"></div>
+                <div className="w-2/4 h-24 bg-[#27272a]/50 animate-pulse rounded-md"></div>
+                <div className="w-3/4 h-24 bg-[#27272a]/50 animate-pulse rounded-md"></div>
+              </div>
+            ) : (
+              <ChatBox chatData={chatData} />
+            )}
           </div>
           <div
             className={`Input-Area ${
@@ -667,7 +699,7 @@ useEffect(() => {
           onSettingsChange={() => fetchChatSettings()}
         />
       </div>
-      <ShadcnToaster />
+      <ShadcnToaster position="top-right" />
     </>
   );
 };

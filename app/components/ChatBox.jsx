@@ -198,7 +198,7 @@ const ChatBox = ({ chatData }) => {
                         alt={upload.name}
                         width={200}
                         height={200}
-                        className="h-[200px] aspect-auto rounded-md"
+                        className="h-[200px] aspect-auto rounded-md object-cover"
                       />
                     </div>
                   ) : null}
