@@ -231,13 +231,41 @@ useEffect(() => {
     try {
       e.preventDefault();
       const clipboardData = e.clipboardData || window.clipboardData;
-      
-      // Try to get HTML content first
       const htmlContent = clipboardData.getData('text/html');
       const plainText = clipboardData.getData('text/plain');
 
-      // If HTML content exists, convert it to markdown
-      if (htmlContent) {
+      // Check if the text comes from a code editor (VSCode, etc.)
+      const isFromCodeEditor = (text) => {
+        // Common code editor indicators in HTML content
+        if (htmlContent) {
+          return htmlContent.includes('class="code"') || 
+                 htmlContent.includes('class="editor"') ||
+                 htmlContent.includes('vscode') ||
+                 htmlContent.includes('monaco-editor') ||
+                 htmlContent.includes('ace_editor') ||
+                 htmlContent.includes('highlight-');
+        }
+        return false;
+      };
+
+      // If content is from a code editor, treat it as code regardless of content
+      if (isFromCodeEditor(plainText)) {
+        const language = detectLanguage(plainText);
+        const formattedText = `\`\`\`${language}\n${plainText.trim()}\n\`\`\`\n`;
+        
+        const textArea = e.target;
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        const text = textArea.value;
+        const before = text.substring(0, start);
+        const after = text.substring(end);
+
+        setTextAreaValue(before + formattedText + after);
+        return;
+      }
+
+      // If HTML content exists and not from code editor, proceed with HTML handling
+      if (htmlContent && !isFromCodeEditor(plainText)) {
         const turndownService = new TurndownService({
           headingStyle: 'atx',
           codeBlockStyle: 'fenced',
@@ -285,7 +313,7 @@ useEffect(() => {
         return;
       }
 
-      // If no HTML content, proceed with the existing code detection logic
+      // If no HTML content or not from code editor, proceed with existing code detection
       const isCode = (text) => {
         const codePatterns = [
           /^(const|let|var|function|class|import|export|if|for|while)/m,
@@ -297,7 +325,29 @@ useEffect(() => {
           /^export\s+/m,
           /=>\s*{/,
           /\bfunction\s*\w*\s*\(/,
-          /\bconst\s+\w+\s*=\s*\(/
+          /\bconst\s+\w+\s*=\s*\(/,
+          // Additional patterns for better code detection
+          /^\s*[a-zA-Z_$][a-zA-Z0-9_$]*\s*\([^)]*\)\s*{/m, // Function declarations
+          /^\s*@\w+/m,  // Decorators
+          /^\s*#include/m,  // C/C++ includes
+          /^\s*package\s+\w+/m,  // Java/Kotlin packages
+          /^\s*using\s+\w+/m,  // C# using statements
+          /^\s*#pragma/m,  // Preprocessor directives
+          /^\s*\/\/ .*/m,  // Single-line comments
+          /^\s*\/\* .*\*\//m,  // Multi-line comments
+          /^\s*<!--.*-->/m,  // HTML comments
+          /^\s*\* @\w+/m,  // JSDoc comments
+          /^\s*[a-zA-Z_$][a-zA-Z0-9_$]*:\s*function/m, // Object method definitions
+          /=>\s*[^{]/m,  // Arrow functions without blocks
+          /\$\{.*\}/,  // Template literals
+          /\b(?:true|false|null|undefined|NaN)\b/,  // Common programming literals
+          /[+\-*/%]=(?!=)/,  // Assignment operators
+          /===?|!==?|<=|>=|[<>]/,  // Comparison operators
+          /&&|\|\||\?\?/,  // Logical operators
+          /\b(?:return|break|continue|throw)\b/,  // Control flow keywords
+          /\b(?:try|catch|finally)\b/,  // Exception handling
+          /\b(?:async|await)\b/,  // Async/await keywords
+          /^\s*[#@][a-zA-Z]\w*/m  // Decorators/attributes
         ];
         return codePatterns.some(pattern => pattern.test(text));
       };
