@@ -10,6 +10,7 @@ import axios from "axios";
 import imageCompression from "browser-image-compression";
 import debounce from "lodash/debounce";
 import toast, { Toaster } from "react-hot-toast";
+import TurndownService from "turndown";
 
 const Page = () => {
   const [uploads, setUploads] = useState([]);
@@ -228,13 +229,201 @@ useEffect(() => {
 
   const textPasteHandler = useCallback((e) => {
     try {
-      const pastedText = (e.clipboardData || window.clipboardData).getData(
-        "text/plain"
-      );
-      setTextAreaValue((prevValue) => prevValue + pastedText);
+      e.preventDefault();
+      const clipboardData = e.clipboardData || window.clipboardData;
+      
+      // Try to get HTML content first
+      const htmlContent = clipboardData.getData('text/html');
+      const plainText = clipboardData.getData('text/plain');
+
+      // If HTML content exists, convert it to markdown
+      if (htmlContent) {
+        const turndownService = new TurndownService({
+          headingStyle: 'atx',
+          codeBlockStyle: 'fenced',
+          emDelimiter: '_'
+        });
+        
+        // Configure turndown to handle code blocks better
+        turndownService.addRule('codeBlocks', {
+          filter: ['pre'],
+          replacement: function(content, node) {
+            const language = node.getAttribute('class')?.replace('language-', '') || '';
+            return `\n\`\`\`${language}\n${content}\n\`\`\`\n`;
+          }
+        });
+
+        // Don't wrap code blocks that are already markdown
+        turndownService.addRule('preserveMarkdownCodeBlocks', {
+          filter: function(node, options) {
+            return node.textContent.startsWith('```') && node.textContent.includes('\n');
+          },
+          replacement: function(content) {
+            return content;
+          }
+        });
+
+        let markdown = turndownService.turndown(htmlContent);
+        
+        // Insert the markdown at cursor position
+        const textArea = e.target;
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        const text = textArea.value;
+        const before = text.substring(0, start);
+        const after = text.substring(end);
+
+        setTextAreaValue(before + markdown + after);
+        
+        // Update cursor position
+        const newCursorPos = start + markdown.length;
+        setTimeout(() => {
+          textArea.selectionStart = newCursorPos;
+          textArea.selectionEnd = newCursorPos;
+        }, 0);
+        
+        return;
+      }
+
+      // If no HTML content, proceed with the existing code detection logic
+      const isCode = (text) => {
+        const codePatterns = [
+          /^(const|let|var|function|class|import|export|if|for|while)/m,
+          /[{};]/,
+          /\b(public|private|protected)\b/,
+          /^\s*(def|class|module|require|import)\b/m,
+          /[<>{}()[\]]/,
+          /^import\s+.*\s+from\s+['"].*['"];?$/m,
+          /^export\s+/m,
+          /=>\s*{/,
+          /\bfunction\s*\w*\s*\(/,
+          /\bconst\s+\w+\s*=\s*\(/
+        ];
+        return codePatterns.some(pattern => pattern.test(text));
+      };
+
+      // Enhanced language detection with better JSON handling
+      const detectLanguage = (text) => {
+        // Try to parse as JSON first
+        try {
+          JSON.parse(text);
+          // If it parses successfully and has typical JSON structure
+          if ((text.startsWith('{') && text.endsWith('}')) || 
+              (text.startsWith('[') && text.endsWith(']'))) {
+            return 'json';
+          }
+        } catch (e) {
+          // Not valid JSON, continue with other checks
+        }
+
+        // Check for file extensions in comments or strings
+        const fileExtMatch = text.match(/\.(jsx?|tsx?|py|java|php|html|css|scss|json|xml|yaml|md|sql|sh|bash|zsh|rs|go|rb|kt|swift)$/m);
+        if (fileExtMatch) {
+          const ext = fileExtMatch[1].toLowerCase();
+          // Map extensions to languages
+          const extensionMap = {
+            'js': 'javascript',
+            'jsx': 'jsx',
+            'ts': 'typescript',
+            'tsx': 'tsx',
+            'py': 'python',
+            'java': 'java',
+            'php': 'php',
+            'html': 'html',
+            'css': 'css',
+            'scss': 'scss',
+            'json': 'json',
+            'xml': 'xml',
+            'yaml': 'yaml',
+            'yml': 'yaml',
+            'md': 'markdown',
+            'sql': 'sql',
+            'sh': 'bash',
+            'bash': 'bash',
+            'zsh': 'bash',
+            'rs': 'rust',
+            'go': 'go',
+            'rb': 'ruby',
+            'kt': 'kotlin',
+            'swift': 'swift'
+          };
+          return extensionMap[ext] || 'javascript';
+        }
+
+        // Check for specific language patterns
+        if (text.includes('<?php')) return 'php';
+        if (text.includes('<?xml')) return 'xml';
+        if (text.match(/^(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER)\s/i)) return 'sql';
+        if (text.match(/^#!/)) return 'bash';
+        if (text.match(/^(package\s+main|import\s+"|func\s+\w+)/)) return 'go';
+        if (text.match(/^(use\s+strict|use\s+warnings)/)) return 'perl';
+        if (text.match(/^(public\s+class|private\s+class)/)) return 'java';
+        if (text.match(/^(def\s+|class\s+\w+:)/)) return 'python';
+        
+        // React/JSX specific patterns
+        if (
+          (/<[A-Z][A-Za-z0-9]*/.test(text) && /\/>/.test(text)) ||
+          (/import\s+.*\s+from\s+['"]react['"]/.test(text)) ||
+          (/className=/.test(text) && /<\//.test(text)) ||
+          (/useEffect|useState|useCallback|useMemo/.test(text)) ||
+          (/props\./.test(text) && /=>/.test(text))
+        ) {
+          return 'jsx';
+        }
+
+        // CSS specific patterns
+        if (text.match(/{[\s\S]*}/) && text.match(/:\s*[#\w-]+;/)) return 'css';
+        
+        // HTML specific patterns
+        if (text.match(/<\/?[a-z][\s\S]*>/i) && !text.includes('className=')) return 'html';
+
+        // Default to javascript if no specific pattern is matched
+        return 'javascript';
+      };
+
+      // Format the pasted text
+      let formattedText = '';
+      if (isCode(plainText)) {
+        const language = detectLanguage(plainText);
+        const lines = plainText.split('\n');
+        const minIndent = lines
+          .filter(line => line.trim())
+          .reduce((min, line) => {
+            const indent = line.match(/^\s*/)[0].length;
+            return indent < min ? indent : min;
+          }, Infinity);
+        
+        const normalizedText = lines
+          .map(line => line.slice(minIndent))
+          .join('\n')
+          .trim();
+
+        formattedText = `\`\`\`${language}\n${normalizedText}\n\`\`\`\n`;
+      } else {
+        formattedText = plainText;
+      }
+
+      // Insert the formatted text at cursor position
+      const textArea = e.target;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const text = textArea.value;
+      const before = text.substring(0, start);
+      const after = text.substring(end);
+
+      setTextAreaValue(before + formattedText + after);
+      
+      // Update cursor position after paste
+      const newCursorPos = start + formattedText.length;
+      setTimeout(() => {
+        textArea.selectionStart = newCursorPos;
+        textArea.selectionEnd = newCursorPos;
+      }, 0);
+
     } catch (error) {
       console.error("Error in text paste handler:", error);
-      toast.error("Error in text paste handler");
+      toast.error("Error handling paste");
+      return true;
     }
   }, []);
 
