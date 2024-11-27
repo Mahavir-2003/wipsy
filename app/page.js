@@ -111,94 +111,186 @@ export default function Home() {
 
         {/* Detailed Documentation */}
         <section className="space-y-8 border-t border-neutral-800 pt-8">
-          <h2 className="text-2xl font-medium text-neutral-200">Documentation</h2>
+          <h2 className="text-2xl font-medium text-neutral-200">Complete Guide</h2>
           
+          {/* Getting Started */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium text-neutral-300">🚀 Getting Started</h3>
+            <div className="space-y-2 bg-neutral-900/50 p-4 rounded-lg">
+              <p className="text-neutral-400">
+                Welcome to Wipsy! Here's how to get started in 3 simple steps:
+              </p>
+              <ol className="list-decimal list-inside space-y-3 text-neutral-400 mt-4">
+                <li>
+                  <span className="text-neutral-200">Choose a Chat ID</span>
+                  <p className="ml-5 mt-1">Pick something memorable like your lab batch number (e.g., "lab12") or project name</p>
+                </li>
+                <li>
+                  <span className="text-neutral-200">Share with Classmates</span>
+                  <p className="ml-5 mt-1">Copy the URL or tell them the Chat ID - that's all they need to join</p>
+                </li>
+                <li>
+                  <span className="text-neutral-200">Start Collaborating</span>
+                  <p className="ml-5 mt-1">Share code, paste screenshots, or write notes - everything syncs in real-time</p>
+                </li>
+              </ol>
+            </div>
+          </div>
+
           {/* Markdown Guide */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-medium text-neutral-300">Markdown Formatting</h3>
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium text-neutral-300">📝 Text Formatting</h3>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <h4 className="text-lg font-medium text-neutral-300">Basic Syntax</h4>
-                <pre className="bg-neutral-900/50 p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">
-                  {`# Heading 1
-## Heading 2
-### Heading 3
+              <div className="space-y-4">
+                <div className="bg-neutral-900/50 p-4 rounded-lg">
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Basic Syntax</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="grid grid-cols-2 gap-2">
+                      <code className="text-neutral-400"># Heading 1</code>
+                      <p className="text-neutral-500">Largest heading</p>
+                      
+                      <code className="text-neutral-400">## Heading 2</code>
+                      <p className="text-neutral-500">Second heading</p>
+                      
+                      <code className="text-neutral-400">**Bold text**</code>
+                      <p className="text-neutral-500">Makes text bold</p>
+                      
+                      <code className="text-neutral-400">*Italic text*</code>
+                      <p className="text-neutral-500">Makes text italic</p>
+                      
+                      <code className="text-neutral-400">~~Strikethrough~~</code>
+                      <p className="text-neutral-500">Strikes through text</p>
+                    </div>
+                  </div>
+                </div>
 
-**Bold Text**
-*Italic Text*
-~~Strikethrough~~
-
-- Bullet point
-1. Numbered list
-
-[Link Text](URL)
-> Blockquote`}
-                </pre>
+                <div className="bg-neutral-900/50 p-4 rounded-lg">
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Lists & Links</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="grid grid-cols-2 gap-2">
+                      <code className="text-neutral-400">- Bullet point</code>
+                      <p className="text-neutral-500">Creates bullet list</p>
+                      
+                      <code className="text-neutral-400">1. Numbered item</code>
+                      <p className="text-neutral-500">Creates numbered list</p>
+                      
+                      <code className="text-neutral-400">[Link text](URL)</code>
+                      <p className="text-neutral-500">Creates clickable link</p>
+                      
+                      <code className="text-neutral-400">{`>`} Quote text</code>
+                      <p className="text-neutral-500">Creates blockquote</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h4 className="text-lg font-medium text-neutral-300">Code Blocks</h4>
-                <pre className="bg-neutral-900/50 p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">
-                  {`Inline \`code\`
 
-\`\`\`javascript
-// Code block with syntax highlighting
-function hello() {
-  console.log('Hello, World!');
+              <div className="space-y-4">
+                <div className="bg-neutral-900/50 p-4 rounded-lg">
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Code Formatting</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-neutral-400 mb-2">Inline Code:</p>
+                      <code className="text-sm bg-neutral-800/50 px-2 py-1 rounded">Use \`code\` for inline</code>
+                    </div>
+                    <div>
+                      <p className="text-neutral-400 mb-2">Code Blocks:</p>
+                      <pre className="text-sm bg-neutral-800/50 p-2 rounded">
+{`\`\`\`javascript
+// Your code here
+function example() {
+  return "Hello!";
 }
 \`\`\``}
-                </pre>
+                      </pre>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Image Upload Guide */}
           <div className="space-y-4">
-            <h3 className="text-xl font-medium text-neutral-300">Image Uploads</h3>
-            <div className="space-y-2 bg-neutral-900/50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-neutral-300">Multiple Upload Methods</h4>
-              <ul className="list-disc list-inside space-y-2 text-neutral-400">
-                <li>Drag and drop images directly into the chat</li>
-                <li>Paste images from clipboard (Ctrl/Cmd + V)</li>
-                <li>Click the upload button to select files</li>
-                <li>Supports PNG, JPG, GIF formats</li>
-                <li>Automatic image compression for faster uploads</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Chat Management */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-medium text-neutral-300">Chat Management</h3>
-            <div className="space-y-2 bg-neutral-900/50 p-4 rounded-lg">
-              <h4 className="text-lg font-medium text-neutral-300">Features & Controls</h4>
-              <ul className="list-disc list-inside space-y-2 text-neutral-400">
-                <li>Chats expire after 24 hours by default</li>
-                <li>Admins can make chats permanent via settings</li>
-                <li>Real-time collaboration with multiple users</li>
-                <li>Automatic message saving</li>
-                <li>Mobile-friendly interface</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Keyboard Shortcuts */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-medium text-neutral-300">Keyboard Shortcuts</h3>
-            <div className="grid md:grid-cols-2 gap-4 bg-neutral-900/50 p-4 rounded-lg">
-              <div className="space-y-2">
-                <h4 className="text-lg font-medium text-neutral-300">Message Input</h4>
-                <ul className="space-y-2 text-neutral-400">
-                  <li><kbd className="px-2 py-1 bg-neutral-800 rounded">Enter</kbd> Send message</li>
-                  <li><kbd className="px-2 py-1 bg-neutral-800 rounded">Shift + Enter</kbd> New line</li>
-                  <li><kbd className="px-2 py-1 bg-neutral-800 rounded">Ctrl/Cmd + V</kbd> Paste content</li>
-                </ul>
+            <h3 className="text-xl font-medium text-neutral-300">🖼️ Working with Images</h3>
+            <div className="bg-neutral-900/50 p-4 rounded-lg">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Upload Methods</h4>
+                  <ul className="space-y-2 text-neutral-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span><strong>Drag & Drop:</strong> Simply drag any image into the chat area</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span><strong>Paste:</strong> Copy an image and press Ctrl/Cmd + V</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span><strong>Upload Button:</strong> Click the image icon to select files</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Supported Features</h4>
+                  <ul className="space-y-2 text-neutral-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span>Automatic image compression</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span>PNG, JPG, GIF support</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span>Preview before sending</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h4 className="text-lg font-medium text-neutral-300">Navigation</h4>
-                <ul className="space-y-2 text-neutral-400">
-                  <li>Click chat ID in navbar to copy link</li>
-                  <li>Click Wipsy logo to return home</li>
-                </ul>
+            </div>
+          </div>
+
+          {/* Pro Tips */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium text-neutral-300">💡 Pro Tips</h3>
+            <div className="bg-neutral-900/50 p-4 rounded-lg">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Keyboard Shortcuts</h4>
+                  <ul className="space-y-2 text-neutral-400">
+                    <li className="flex items-center gap-2">
+                      <kbd className="px-2 py-1 bg-neutral-800 rounded text-sm">Enter</kbd>
+                      <span>Send message</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <kbd className="px-2 py-1 bg-neutral-800 rounded text-sm">Shift + Enter</kbd>
+                      <span>New line</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <kbd className="px-2 py-1 bg-neutral-800 rounded text-sm">Ctrl/Cmd + V</kbd>
+                      <span>Paste content</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-neutral-300 mb-3">Best Practices</h4>
+                  <ul className="space-y-2 text-neutral-400">
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span>Use descriptive chat IDs for easy sharing</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span>Save important content before 24h expiry</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">→</span>
+                      <span>Request permanent status for important chats</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
