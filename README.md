@@ -10,7 +10,7 @@ In computer labs or practical sessions, students frequently encounter situations
 
 ### Solution
 
-Wipsy offers a simple and intuitive solution by providing a notepad-like interface for creating temporary, shareable chats. These chats automatically get deleted after 24 hours, ensuring a clutter-free experience while maintaining privacy and security.
+Wipsy offers a simple and intuitive solution by providing a notepad-like interface for creating temporary, shareable chats. All chats automatically get deleted after 24 hours, ensuring a clutter-free experience while maintaining privacy and security.
 
 ## Website URL
 

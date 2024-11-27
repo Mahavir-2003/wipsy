@@ -1,5 +1,5 @@
 import connectDB from "@/app/lib/dbConnect";
-import Chat from "@/app/models/chats";
+import Chat from "@/app/models/Chat";
 import { NextResponse } from "next/server";
 
 

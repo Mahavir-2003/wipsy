@@ -1,6 +1,7 @@
 "use client";
-import ChatBox from "@/app/components/ChatBox";
-import UploadViewer from "@/app/components/UploadViewer";
+import ChatBox from "../../components/ChatBox";
+import UploadViewer from "../../components/UploadViewer";
+import Navbar from "../../components/Navbar";
 import { Spinner } from "@nextui-org/spinner";
 import NextImage from "next/image";
 import { useParams } from "next/navigation";
@@ -11,11 +12,7 @@ import imageCompression from "browser-image-compression";
 import debounce from "lodash/debounce";
 import toast, { Toaster } from "react-hot-toast";
 import TurndownService from "turndown";
-import AdminControls from '@/app/components/AdminControls';
-import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
-import { useToast } from "@/hooks/use-toast";
 import { CircularProgress } from "@nextui-org/progress";
-import Navbar from "@/app/components/Navbar";
 
 const Page = () => {
   const [uploads, setUploads] = useState([]);
@@ -25,10 +22,6 @@ const Page = () => {
   const [ID, setID] = useState(slug);
   const [isUploading, setIsUploading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [chatSettings, setChatSettings] = useState({
-    isPermanent: false
-  });
-  const { toast: shadcnToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
 useEffect(() => {
@@ -52,38 +45,37 @@ useEffect(() => {
         setChatData(response.data.chatHistory);
         setIsLoading(false);
         
-        // Added emoji to expiry toast
-        shadcnToast({
-          title: "⏳ Chat Expiry",
-          description: `Your chat will expire in ${response.data.expiryTime}`,
-          duration: 5000,
-          className: "bg-[#18181b] text-white border border-[#27272a]"
-        });
-
+        // Calculate remaining time
+        const chat = response.data.chat;
+        if (chat && chat.createdAt) {
+          const createdAt = new Date(chat.createdAt);
+          const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+          const remainingTime = expiresAt - new Date();
+          const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
+          const remainingMinutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+          
+          toast.success(
+            `Chat expires in ${remainingHours}h ${remainingMinutes}m`, 
+            {
+              duration: 4000,
+              icon: '⏳'
+            }
+          );
+        }
       } else {
         console.error(
           "Server error when fetching chat history:",
           response.data.error
         );
         setIsLoading(false);
-        // Added emoji to error toast
-        shadcnToast({
-          title: "❌ Error",
-          description: "Server error when fetching chat history",
-          className: "bg-[#18181b] text-white border border-[#27272a]"
-        });
+        toast.error("Server error when fetching chat history");
       }
     } catch (error) {
       setIsLoading(false);
       console.error("Network error when fetching chat history:", error);
-      // Added emoji to network error toast
-      shadcnToast({
-        title: "🌐 Network Error",
-        description: "Network error when fetching chat history",
-        className: "bg-[#18181b] text-white border border-[#27272a]"
-      });
+      toast.error("Network error when fetching chat history");
     }
-  }, [ID, setChatData, shadcnToast]);
+  }, [ID, setChatData]);
 
   const updateChatHistory = useCallback(
     debounce(async (chatHistory) => {
@@ -122,19 +114,6 @@ useEffect(() => {
       fetchChatHistory();
     }
   }, [fetchChatHistory, slug]);
-
-  useEffect(() => {
-    const fetchChatSettings = async () => {
-      try {
-        const response = await axios.get(`/api/settings?chatID=${ID}`);
-        setChatSettings(response.data);
-      } catch (error) {
-        console.error('Error fetching chat settings:', error);
-      }
-    };
-
-    fetchChatSettings();
-  }, [ID]);
 
   const fileUploadClickHandler = useCallback(() => {
     try {
@@ -605,8 +584,16 @@ useEffect(() => {
     <>
       <Navbar
         chatID={ID}
-        isPermanent={chatSettings.isPermanent}
-        onSettingsChange={() => fetchChatSettings()}
+      />
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: '#18181b',
+            color: '#ffffff',
+            border: '1px solid #27272a'
+          }
+        }}
       />
       <div className="w-full h-full flex justify-center items-end relative pt-16">
         <div className="h-full lg:w-[70%] w-[96%] flex flex-col justify-start items-center">
@@ -699,7 +686,6 @@ useEffect(() => {
           </div>
         </div>
       </div>
-      <ShadcnToaster position="top-right" />
     </>
   );
 };
