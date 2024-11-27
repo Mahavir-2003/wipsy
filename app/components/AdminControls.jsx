@@ -89,13 +89,13 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
       <DialogTrigger asChild>
         <Button
           size="icon"
-          variant="ghost"
-          className="fixed bottom-4 right-4 md:bottom-8 md:right-8 bg-background/10 hover:bg-background/20 transition-all duration-200"
+          
+          className="bg-[#18181b] hover:bg-[#27272a] transition-all duration-200"
         >
           <Settings className="h-5 w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="dark border-border bg-background text-foreground">
+      <DialogContent className="dark border-border bg-[#09090b] text-foreground w-[95%] md:w-full max-w-lg mx-auto">
         <DialogHeader className="space-y-3">
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Database className="h-5 w-5" />
@@ -113,7 +113,7 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
                 <Lock className="h-4 w-4" />
                 Admin Password
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   id="password"
                   type="password"
@@ -123,14 +123,14 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
                     setPassword(e.target.value);
                     setIsPasswordVerified(false);
                   }}
-                  className="bg-background border-input focus-visible:ring-primary"
+                  className="bg-[#18181b] border-input focus-visible:ring-primary"
                   disabled={isPasswordVerified}
                 />
                 <Button
                   onClick={verifyPassword}
                   disabled={!password || isPasswordVerified}
                   variant={isPasswordVerified ? "success" : "secondary"}
-                  className="gap-2"
+                  className="gap-2 whitespace-nowrap"
                 >
                   {isPasswordVerified ? (
                     <>
@@ -144,7 +144,7 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
               </div>
             </div>
             
-            <div className={`flex items-center justify-between space-x-2 bg-muted/50 p-4 rounded-lg ${!isPasswordVerified && 'opacity-50'}`}>
+            <div className={`flex items-center justify-between space-x-2 bg-[#18181b] p-4 rounded-lg ${!isPasswordVerified && 'opacity-50'}`}>
               <div className="space-y-0.5">
                 <label className="text-sm font-medium text-foreground">Permanent Storage</label>
                 <p className="text-xs text-muted-foreground">
@@ -165,7 +165,7 @@ const AdminControls = ({ chatID, isPermanent, onSettingsChange }) => {
             variant="outline"
             onClick={handleClose}
             disabled={loading}
-            className="bg-background hover:bg-muted"
+            className="bg-[#18181b] hover:bg-[#27272a] w-full sm:w-auto"
           >
             Close
           </Button>

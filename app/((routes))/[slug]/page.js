@@ -15,6 +15,7 @@ import AdminControls from '@/app/components/AdminControls';
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { CircularProgress } from "@nextui-org/progress";
+import Navbar from "@/app/components/Navbar";
 
 const Page = () => {
   const [uploads, setUploads] = useState([]);
@@ -602,7 +603,12 @@ useEffect(() => {
 
   return (
     <>
-      <div className="w-full h-full flex justify-center items-end relative">
+      <Navbar
+        chatID={ID}
+        isPermanent={chatSettings.isPermanent}
+        onSettingsChange={() => fetchChatSettings()}
+      />
+      <div className="w-full h-full flex justify-center items-end relative pt-16">
         <div className="h-full lg:w-[70%] w-[96%] flex flex-col justify-start items-center">
           <div className="w-full overflow-hidden py-3 flex-1 h-full">
             {isLoading ? (
@@ -692,12 +698,6 @@ useEffect(() => {
             </button>
           </div>
         </div>
-        
-        <AdminControls
-          chatID={ID}
-          isPermanent={chatSettings.isPermanent}
-          onSettingsChange={() => fetchChatSettings()}
-        />
       </div>
       <ShadcnToaster position="top-right" />
     </>

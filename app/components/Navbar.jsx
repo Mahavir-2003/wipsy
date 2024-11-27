@@ -1,18 +1,22 @@
 "use client";
-import { useParams } from "next/navigation"
+import React from 'react';
+import AdminControls from './AdminControls';
 
-const Navbar = () => {
-  const {slug} = useParams();
-
-  const redirectToHome = () => {
-    window.location.href = '/';
-  }
-  
+const Navbar = ({ chatID, isPermanent, onSettingsChange }) => {
   return (
-    <header className='w-full border-b-[1px] border-[#fafafa]/10 py-4 px-6 flex justify-between items-center'>
-        <h1 onClick={redirectToHome} className='hover:cursor-pointer text-2xl font-medium'>Wipsy<span className="text-[#fafafa]/50 font-light text-xl">{slug ? " / "+slug : null}</span></h1>
-    </header>
-  )
-}
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-[#09090b] border-b border-[#fafafa]/10 z-50">
+      <div className="h-full max-w-7xl mx-auto px-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <span className="text-xl font-semibold text-[#fafafa]">Wipsy</span>
+        </div>
+        <AdminControls
+          chatID={chatID}
+          isPermanent={isPermanent}
+          onSettingsChange={onSettingsChange}
+        />
+      </div>
+    </nav>
+  );
+};
 
-export default Navbar
+export default Navbar;
