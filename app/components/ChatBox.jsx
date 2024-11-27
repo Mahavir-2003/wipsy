@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -164,8 +164,24 @@ const downloadFile = async (url, name) => {
   }
 };
 const ChatBox = ({ chatData }) => {
+  // Add ref for the chat container
+  const chatContainerRef = useRef(null);
+
+  // Scroll to bottom whenever chatData changes
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [chatData]);
+
   return (
-    <div className="bg-transparent min-h-full flex flex-col gap-y-10 justify-start items-center chat-history w-full px-3 py-2 overflow-x-hidden overflow-y-auto h-[200px]">
+    <div 
+      ref={chatContainerRef}
+      className="bg-transparent min-h-full flex flex-col gap-y-10 justify-start items-center chat-history w-full px-3 py-2 overflow-x-hidden overflow-y-auto h-[200px]"
+    >
       {chatData.map((chat, index) => (
         <div
           key={index}
