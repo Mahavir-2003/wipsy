@@ -85,9 +85,10 @@ useEffect(() => {
         } else {
           const expiresAt = new Date(chat.updatedAt).getTime() + (TTL_SECONDS * 1000);
           const remainingTime = expiresAt - Date.now();
-          const remainingSeconds = Math.floor(remainingTime / 1000);
+          const remainingHours = Math.floor(remainingTime / (1000 * 60 * 60));
+          const remainingMinutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
           
-          if (remainingSeconds <= 0) {
+          if (remainingTime <= 0) {
             toast.error(
               'Chat will expire soon!', 
               {
@@ -96,8 +97,12 @@ useEffect(() => {
               }
             );
           } else {
+            const timeMessage = remainingHours > 0 
+              ? `${remainingHours}h ${remainingMinutes}m`
+              : `${remainingMinutes}m`;
+              
             toast.success(
-              `Chat expires in ${remainingSeconds} seconds`, 
+              `Chat expires in ${timeMessage}`, 
               {
                 duration: 4000,
                 icon: '⏳'
